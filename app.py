@@ -1,16 +1,35 @@
 from flask import Flask, jsonify, request, render_template
 import Account
+import Round
+import pandas as pd
+import base64
+from data_util import select_round_data, plot_stock_prices
+
 
 app = Flask(__name__)
 
 # Dummy data for user's FF amount
 ff_amount = 10000
 share_value = 500
-user_account = Account.Account(ff_amount)
+user_account = Account.Account('Joe', ff_amount)
+tickers = ['AMZN', 'MSFT', 'BA', 'PFE', 'NKE']
+selected_data = None
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    global selected_data 
+    # Check if data has already been selected
+    if selected_data is None:
+        # Data has not been selected yet, so select it
+        stock_data = pd.read_csv('data/historical_closing_prices.csv')
+        selected_data = select_round_data(stock_data, 'ReefRaveDelicacies')
+        new_round = Round.Round(selected_data)
+    else:
+        # Data has already been selected, no need to run select_round_data again
+        pass 
+    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies')
+    plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
+    return render_template('index.html', plot_base64 = plot_base64)
 
 @app.route('/ff_amount')
 def get_ff_amount():
