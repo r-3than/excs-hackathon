@@ -1,0 +1,9 @@
+Windows:
+venv\Scripts\activate
+
+Unix / MacOS
+source venv/bin/activate
+
+Install libraries
+pip install -r requirements.txt
+
