@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishFolio</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+</head>
+<body>
+    <div class="main space">
+        <div class="main wrapper">
+            <div class="main box title">
+                <img src="../static/logo_new.png">
+            </div>
+        </div>
+        <p style="color: whitesmoke;">Lobby Code: <b>{{session['code']}}</b></p>
+        <div class="main wrapper">
+            <div class="main box graph" id="graphBox">
+                {% if lobby_leader == true %}
+                    <br><p>Click ready when everyone is in!</p><br/>
+                {% else %}
+                    <br><p>Sit tight - waiting for game to start..</p><br/>
+                {% endif %}
+            </div>
+        </div>
+        <div class="main wrapper">
+            <div class="main box account">
+                <h3>Players:</h3><br>
+                {% for player in players %}
+                    {{player}}<br>
+                {% endfor %}
+            </div>
+            {% if lobby_leader == true %}
+            <div class="main box action">
+                <form method="POST" action="{{ url_for('main')}}">
+                    <button type="submit" id="startButton" style="width: 100%">Begin Game</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

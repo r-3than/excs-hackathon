@@ -1,5 +1,6 @@
 class Player:
     def __init__(self, sid: str, display_name: str) -> None:
+        # TODO known issue where sid resets with refresh and doesnt persist with session
         self.sid = sid
         self.display_name = display_name
 

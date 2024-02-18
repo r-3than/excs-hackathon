@@ -34,37 +34,51 @@ lobbies = []
 def index():
     print("Homepage request made")
     # Homepage
-    return render_template('lobby.html', async_mode=socketio.async_mode)
+    return render_template('home.html', async_mode=socketio.async_mode)
 
 
-@app.route('/game', methods=["GET", "POST"])
-def game():
+@app.route("/main", methods=["POST"])
+def main():
+    return render_template("main.html")
+
+@app.route('/pregame', methods=["GET", "POST"])
+def pregame():
+    # Joins a pregame lobby
     print("Join lobby request made")
-    # This joins a game
 
     # Just created a game
     if request.method == "GET":
         code = session.get("code", None)
-        if code is None:
-            return redirect("/")
+        is_lobby_leader = True
     # Joining an existing game
     else:
-        code = request.form["codeInput"]
+        code = request.form.get("codeInput", None)
+        display_name = request.form.get("nameInput", "Player")
         print(f"Join req: joiner has set session variable as code {code}")
         session["code"] = code
-        session["display_name"] = request.form["nameInput"]
-        # NOTE cant do JoinRoom here because this isnt a socket event so we dont have sid
+        session["display_name"] = display_name
+        is_lobby_leader = False
+
+    if code is None:
+        print("Join req: no code found!")
+        return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    if lobby is None:
+        print(f"Join req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        return redirect("/")
+
     assert isinstance(lobby, Lobby)
 
+    # TODO known issue with duplicates
     player_names = [p.display_name for p in lobby.players]
+    print(f"Join req: players in lobby {code} are {player_names}")
 
-    return render_template("game.html", players=player_names, async_mode=socketio.async_mode)
+    return render_template("pregame.html", players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode)
 
 
-@app.route('/create', methods=["POST"])
-def create():
+@app.route('/create_lobby', methods=["POST"])
+def create_lobby():
     # Creates a new lobby then sends the user to join it
     print("Create lobby request made")
     code = randint(1000, 9999)
@@ -78,18 +92,18 @@ def create():
     session["code"] = code
     session["display_name"] = request.form["nameInput"]
 
-    return redirect(url_for("game"))
+    return redirect(url_for("pregame"))
 
 
-@app.route("/load_lobby", methods=["POST"])
-def load_lobby():
+@app.route("/find_lobby", methods=["POST"])
+def find_lobby():
     # Used to handle the form and decide which action to take
     print("Load lobby request made")
     code = request.form.get("codeInput", "")
     if code == "":
-        return redirect(url_for("create"), 307) # Code 307 passes the POST data along with the reroute
+        return redirect(url_for("create_lobby"), 307) # Code 307 passes the POST data along with the reroute
     elif len(code) == 4 and code.isdecimal():
-        return redirect(url_for("game"), 307)
+        return redirect(url_for("pregame"), 307)
     else:
         return redirect("/")
 
@@ -108,7 +122,7 @@ def load_lobby():
 #######################################
 @socketio.event
 def connect():
-    # Gets called by each client when they first load the game page
+    # Gets called by each client when they first load the pregame page
     print(f"Conn event: triggered by {request.sid}")
     code = session.get("code", None)
 
