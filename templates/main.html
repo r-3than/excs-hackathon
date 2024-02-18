@@ -36,8 +36,9 @@
 
 
             socket.on("show_round", function(msg){
-                clearInterval(timerloop);
-                secondsleft = 20;
+                if (msg.data == -1){
+                    clearInterval(timerloop);
+                }
                 gameLoop(msg.data);
                 let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
                 let stockValue = document.getElementById("stockHeld")
@@ -45,6 +46,7 @@
                 document.getElementById("freeFunds").innerHTML = "Free Funds: " + msg.ff;
                 
             })
+            running = false;
             secondsleft = 20;
             let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
             let stockValue = document.getElementById("stockHeld");
@@ -219,7 +221,9 @@
     var secondsleft;
         function gameLoop(index){
             nextGraph(index); // when does thomas does his thing lobby created show graph
+            if (running == false){
             timerloop = setInterval(function() { // timer shit
+                running = true
 
             // Get today's date and time
             secondsleft = secondsleft -1;
@@ -228,11 +232,11 @@
 
             // If the count down is finished, write some text
             if (secondsleft <= 0) {
-                clearInterval(timerloop);
                 socket.emit('action', {"action": 'end',"qty":0,"lobby_code":"{{ code}}" });
+                secondsleft = 20;
             }}, 1000
             );
-            
+        }
             
         }
 
