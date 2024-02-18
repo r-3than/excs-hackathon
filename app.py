@@ -6,8 +6,8 @@ import Round
 import pandas as pd
 import base64
 from data_util import select_round_data, split_dataframe, plot_stock_prices#, plot_stock_prices3
-from flask import Flask, render_template, session, request, \
-    copy_current_request_context, redirect, url_for
+from flask import Flask, render_template, request, \
+    copy_current_request_context, redirect, url_for, make_response
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 import uuid
@@ -61,7 +61,7 @@ def index():
 @app.route("/main", methods=["GET"])
 def main():
     session_key = request.cookies.get("seshKey", None)
-    code = session.get("code", None)
+    code = request.cookies.get("code", None)
     print(f"{session_key} -> Main req: loading main for lobby {code}!")
 
     if code is None:
@@ -81,11 +81,11 @@ def main():
         print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
         return redirect("/")
 
-    code = session.get("code", None)
+    code = request.cookies.get("code", None)
     for lob in lobbies:
         print(lob.code,code)
         if str(lob.code) == str(code):
-            return render_template("main.html",market_data=lob.get_market_data(),ticker='ReefRaveDelicacies')
+            return render_template("main.html",market_data=lob.get_market_data(),ticker='ReefRaveDelicacies',code=code)
     return redirect("/")
 
     
@@ -100,17 +100,19 @@ def pregame():
     # Joins a pregame lobby
     #print("Join lobby request made")
 
+    tempCODE = None
+    tempDISP = None
     # Just created a game
     if request.method == "GET":
-        code = session.get("code", None)
+        code = request.cookies.get("code", None)
         is_lobby_leader = True
     # Joining an existing game
     else:
         code = request.form.get("codeInput", None)
         display_name = request.form.get("nameInput", "Player")
-        #print(f"Join req: joiner has set session variable as code {code}")
-        session["code"] = code
-        session["display_name"] = display_name
+        #print(f"Join req: joiner has set request.cookies. variable as code {code}")
+        tempCODE=code
+        tempDISP= display_name
         is_lobby_leader = False
 
     if code is None:
@@ -128,7 +130,12 @@ def pregame():
     player_names = [p.display_name for p in lobby.players]
     #print(f"Join req: players in lobby {code} are {player_names}")
 
-    return render_template("pregame.html", players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode)
+    resp=make_response(render_template("pregame.html",code=code, players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode))
+    if tempCODE != None:
+        resp.set_cookie("code",tempCODE)
+    if tempDISP != None:
+        resp.set_cookie("display_name",tempDISP)
+    return resp
 
 
 
@@ -145,10 +152,12 @@ def create_lobby():
     lobbies.append(lobby)
     #print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
 
-    session["code"] = code
-    session["display_name"] = request.form["nameInput"]
+    resp = make_response(redirect(url_for("pregame")))
 
-    return redirect(url_for("pregame"))
+    resp.set_cookie("code", str(code))
+    resp.set_cookie("display_name",request.form["nameInput"])
+
+    return resp
 
 
 
@@ -207,10 +216,10 @@ def connect():
 def joinLobby(message):
     # Gets called by each client when they first load the pregame page
     #print(f"Conn event: triggered by {request.sid}")
-    code = session.get("code", None)
+    code = request.cookies.get("code", None)
 
     if code is None:
-        #print("Conn event: No lobby code set as session variable!")
+        #print("Conn event: No lobby code set as request.cookies. variable!")
         return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
@@ -224,7 +233,7 @@ def joinLobby(message):
     #print(f"Conn event: {request.sid} has found lobby {lobby.code}")
     
 
-    player = Player(request.sid, message["data"], session.get("display_name", "Player"))
+    player = Player(request.sid, message["data"], request.cookies.get("display_name", "Player"))
     for ply in players:
         if request.cookies.get("seshKey") == ply.session_id:
             player = ply
@@ -235,7 +244,7 @@ def joinLobby(message):
         print(f"Conn event: {request.sid} is already in {lobby.code}!")
 
     message = {"room": str(code)}
-    player_name = session.get("display_name", "Player")
+    player_name = request.cookies.get("display_name", "Player")
 
     #print(f"Conn event: {request.sid} is calling join event with message {message}")
 
@@ -274,7 +283,7 @@ def getPlayer(message):
 
 
     cookieUuid = str(uuid.uuid4())
-    player = Player(request.sid,cookieUuid, session.get("display_name", "Player"))
+    player = Player(request.sid,cookieUuid, request.cookies.get("display_name", "Player"))
     players.append(player)
 
     #print(f"Conn event: triggered by {cookieUuid}")
@@ -289,10 +298,10 @@ def getPlayer(message):
 @socketio.event
 def beginGame():
     print(f"Bg event: triggered by {request.sid}")
-    code = session.get("code", None)
+    code = request.cookies.get("code", None)
 
     if code is None:
-        print("Bg event: No lobby code set as session variable!")
+        print("Bg event: No lobby code set as request.cookies. variable!")
         return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
@@ -321,35 +330,34 @@ def join(message):
     # This is what actually puts a client into a room
     #print(f"Join event triggered by {request.sid}")
     join_room(message['room'])
-    session['receive_count'] = session.get('receive_count', 0) + 1
+    #request.cookies.['receive_count'] = request.cookies.get('receive_count', 0) + 1
     #print(rooms())
-    emit('my_response',
-         {'data': 'In rooms: ' + ', '.join(rooms()),
-          'count': session['receive_count']})
-
+    
 
 
 
 
 @socketio.event
 def my_room_event(message):
+    pass
     # This is part of the example app, used to send a message to the room
     #print(f"Room message event triggered by {request.sid}")
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
-         {'data': message['data'], 'count': session['receive_count']},
-         to=message['room'])
+    #request.cookies.['receive_count'] = request.cookies..get('receive_count', 0) + 1
+    #emit('my_response',
+    #     {'data': message['data'], 'count': request.cookies.['receive_count']},
+    #     to=message['room'])
 
 
 
 
 @socketio.event
 def my_event(message):
+    pass
     # Part of the example, just an echo event
     #print(f"Echo event triggered by {request.sid}")
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
-         {'data': message['data'], 'count': session['receive_count']})
+ #   request.cookies.['receive_count'] = request.cookies..get('receive_count', 0) + 1
+  #  emit('my_response',
+#         {'data': message['data'], 'count': request.cookies.['receive_count']})
 
 
 
