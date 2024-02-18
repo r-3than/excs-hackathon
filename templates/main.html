@@ -11,6 +11,9 @@
     <script type="text/javascript" charset="utf-8">
         var socket;
         var timerloop;
+        function addSpacesBeforeCapital(str) {
+            return str.replace(/([A-Z])/g, ' $1');
+        }
         $(document).ready(function() {
             // Connect to the Socket.IO server.
             // The connection URL has the following format, relative to the current page:
@@ -33,11 +36,16 @@
 
 
             socket.on("show_round", function(msg){
-                console.log("WTFFFF");
                 gameLoop(msg.data);
-                document.getElementById("stockHeld").innerHTML = "Stock Held: " + msg.stock;
+                let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
+                let stockValue = document.getElementById("stockHeld")
+                stockValue.innerHTML = tickerNoCaps + " Stock Held: "  + msg.stock;
                 document.getElementById("freeFunds").innerHTML = "Free Funds: " + msg.ff;
             })
+            let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
+            let stockValue = document.getElementById("stockHeld")
+            stockValue.innerHTML = tickerNoCaps + " Stock Held: "  + msg.stock;
+
         });
     </script>
 
@@ -49,6 +57,7 @@
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-exports.min.js"></script>
     <link href="https://cdn.anychart.com/releases/8.11.0/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
     <link href="https://cdn.anychart.com/releases/8.11.0/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+
 </head>
 <body>
     <div class="main space">
@@ -83,7 +92,9 @@
                 <div>
                     <button id="waitButton" style="width: 100%" onclick="waitAnimation()">Wait</button>
                 </div>
-                
+                <div>
+                    <p id="currentAction" style="width: 100%"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -103,10 +114,12 @@
         let buyButton = document.getElementById("buyButton")
         let sellButton = document.getElementById("sellButton")
         let waitButton = document.getElementById("waitButton")
+        let currentAction = document.getElementById("currentAction")
         let graphBox = document.getElementById("graphBox")
         var graphs = [];
         let graphCount = data.length;
         let graphWidth = Math.floor(100/graphCount);
+        let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
         //let gapWidth = (100 - graphCount*graphWidth)/(graphCount-1)
 
         for(var i=0; i<graphCount; i++) {
@@ -138,6 +151,7 @@
                 console.log(buyInput.value);
                 // TODO call buy function
                 socket.emit('action', {"action": 'buy',"qty":buyInput.value,"lobby_code":"{{ session['code'] }}" });
+                currentAction.innerHTML = " You are currently buying " + buyInput.value + " " + tickerNoCaps;
                 resetBuy()
                 resetSell()
                 resetWait()
@@ -166,6 +180,7 @@
                 console.log(sellInput.value);
                 // TODO call sell function
                 socket.emit('action', {"action": 'sell',"qty":buyInput.value,"lobby_code":"{{ session['code'] }}" });
+                currentAction.innerHTML = "You are currently selling " + buyInput.value + " " + tickerNoCaps;
                 resetBuy()
                 resetSell()
                 resetWait()
@@ -189,6 +204,8 @@
             } else {
                 console.log('wait');
                 socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"{{ session['code'] }}" });
+                currentAction.innerHTML = "You are currently holding " + tickerNoCaps;
+
             }
         }
 
