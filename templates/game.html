@@ -60,20 +60,7 @@
             // Handlers for the different forms in the page.
             // These accept data from the user and send it to the server in a
             // variety of ways
-            $('form#emit').submit(function(event) {
-                socket.emit('my_event', {data: $('#emit_data').val()});
-                return false;
-            });
-            $('form#broadcast').submit(function(event) {
-                socket.emit('my_broadcast_event', {data: $('#broadcast_data').val()});
-                return false;
-            });
-            $('form#create').submit(function(event) {
-                socket.emit('create');
-                return false;
-            });
             $('form#join').submit(function(event) {
-                console.log("Emitting join event")
                 socket.emit('join', {room: $('#join_room').val()});
                 return false;
             });
@@ -82,7 +69,6 @@
                 return false;
             });
             $('form#send_room').submit(function(event) {
-                console.log("Emitting send event")
                 socket.emit('my_room_event', {room: $('#room_name').val(), data: $('#room_data').val()});
                 return false;
             });
@@ -101,20 +87,12 @@
     <h1>Flask-SocketIO Test</h1>
     <p>
       You are in lobby: <b>{{ session['code'] }}</b><br>
-      Other players in this lobby are: <b>TODO</b><br>
+      Other players in this lobby are:
+      {% for player in players %}
+        <b>{{player}}</b><br>
+      {% endfor %}
     </p>
     <h2>Send:</h2>
-    <form id="emit" method="POST" action="{{ url_for('game')}}">
-        <input type="text" name="emit_data" id="emit_data" placeholder="Message">
-        <input type="submit" value="Echo">
-    </form>
-    <form id="broadcast" method="POST" action="{{ url_for('game')}}">
-        <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
-        <input type="submit" value="Broadcast">
-    </form>
-    <form id="create" method="POST" action="{{ url_for('game')}}">
-        <input type="submit" value="Create Room">
-    </form>
     <form id="join" method="POST" action="{{ url_for('game')}}">
         <input type="text" name="join_room" id="join_room" placeholder="Room Name">
         <input type="submit" value="Join Room">

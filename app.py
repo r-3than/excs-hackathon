@@ -5,14 +5,13 @@ from flask import Flask, render_template, session, request, \
     copy_current_request_context, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
-from lobby import Lobby
+from classes import Player, Lobby
 
 # Socketio stuff, dont touch
 async_mode = None
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
@@ -55,7 +54,12 @@ def game():
         session["display_name"] = request.form["display_name"]
         # NOTE cant do JoinRoom here because this isnt a socket event so we dont have sid
 
-    return render_template("game.html", async_mode=socketio.async_mode)
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    assert isinstance(lobby, Lobby)
+
+    player_names = [p.display_name for p in lobby.players]
+
+    return render_template("game.html", players=player_names, async_mode=socketio.async_mode)
 
 
 @app.route('/create', methods=["POST"])
@@ -102,7 +106,7 @@ def load_lobby():
 #######################################
 @socketio.event
 def connect():
-    # I thought this got called when each client connected but that might no actually be the case
+    # Gets called by each client when they first load the game page
     print(f"Conn event: triggered by {request.sid}")
     code = session.get("code", None)
 
@@ -120,9 +124,12 @@ def connect():
 
     print(f"Conn event: {request.sid} has found lobby {lobby.code}")
 
-    if not request.sid in lobby.players:
-        lobby.add_player(request.sid)
+    player = Player(request.sid, session.get("display_name", "Player"))
+
+    if lobby.add_player(player):
         print(f"Conn event: {request.sid} has been added to {lobby.code}")
+    else:
+        print(f"Conn event: {request.sid} is already in {lobby.code}!")
 
     message = {"room": str(code)}
 
