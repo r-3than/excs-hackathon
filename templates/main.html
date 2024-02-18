@@ -34,6 +34,12 @@
                 setCookie("seshKey",msg.data,7); //set cookie for 7 days
             });
 
+            socket.on('endgame', function() {
+                
+                setCookie("seshKey",0,0); //set cookie for 7 days
+                window.location.href="{{ url_for('endgame') }}"
+            });
+
 
             socket.on("show_round", function(msg){
                 clearInterval(timerloop);
