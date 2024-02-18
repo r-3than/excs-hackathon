@@ -1,1 +1,2 @@
 Flask==2.0.2
+flask_socketio==5.3.6

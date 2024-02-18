@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishFolio</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+</head>
+<body>
+    <div class="main space">
+        <div class="main wrapper">
+            <div class="main box title">
+                <h1>FISHFOLIO</h1>
+            </div>
+        </div>
+        <div class="main wrapper">
+            <form templates method="POST" action="{{ url_for('find_lobby')}}" class="main box multiplayer">
+                <h2>CODE:</h2>
+                <input type="text" inputmode="numeric" name="codeInput" id="codeInput" style="text-transform: uppercase;">
+                <h2>NAME:</h2>
+                <input name="nameInput" id="nameInput">
+                <button type="submit" id="lobbyButton">CREATE LOBBY</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let codeInput = document.getElementById("codeInput");
+        let nameInput = document.getElementById("nameInput");
+        let lobbyButton = document.getElementById("lobbyButton");
+
+        codeInput.addEventListener('input', function (evt) {
+            if(this.value=="") {
+                lobbyButton.innerText = "CREATE LOBBY";
+            } else {
+                lobbyButton.innerText = "JOIN LOBBY";
+            }
+        });
+    </script>
+</body>
+</html>
