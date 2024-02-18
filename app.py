@@ -390,7 +390,7 @@ def action(message):
         #print("user CODES",message["lobby_code"])
         if str(message["lobby_code"]) == str(lob.code):
 
-            if message["action"] == "end":
+            if message["action"] == "end" and currentPlayer == lob.players[0]:
                 next_graph=lob.nextRound()
                 if(next_graph == -1):
                     for player in lob.players:
