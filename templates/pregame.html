@@ -29,12 +29,21 @@
             socket.on('getKey', function(msg) {
                 
                 setCookie("seshKey",msg.data,7); //set cookie for 7 days
-                socket.emit("joinLobby",{data:"ashdbkjas"});//join Lobby
+                socket.emit("joinLobby",{data:msg.data});//join Lobby
             });
             socket.on('newPlayerJoined', function(msg) {
                 
                 document.getElementById("changeMe").innerHTML = document.getElementById("changeMe").innerHTML + msg.data +"\n" ;
 
+            });
+            socket.on('beginGame', function(msg, cb) {
+                console.log("Begin game event triggered!")
+                window.location.href = "{{ url_for('main') }}"
+            });
+            $('form#begin_game').submit(function(event) {
+                console.log("Firing start game event!")
+                socket.emit('beginGame');
+                return false;
             });
         });
     </script>
@@ -63,8 +72,8 @@
             </div>
             {% if lobby_leader == true %}
             <div class="main box action">
-                <form method="POST" action="{{ url_for('main')}}">
-                    <button type="submit" id="startButton" style="width: 100%">Begin Game</button>
+                <form id="begin_game" method="GET" action="{{ url_for('pregame')}}">
+                    <button type="submit" id="beginButton" style="width: 100%">Begin Game</button>
                 </form>
             </div>
             {% endif %}
