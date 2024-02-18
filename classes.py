@@ -1,5 +1,8 @@
+from dataclasses import make_dataclass
 import uuid
-import pandas as pd 
+import pandas as pd
+
+from data_util import select_round_data, split_dataframe 
 
 class Player:
     def __init__(self, sid: str, cookie_id:str, display_name: str) -> None:
@@ -8,6 +11,7 @@ class Player:
         self.display_name = display_name
         self.ff_amount = 10000
         self.share_c = 0.0
+       
 
     def __str__(self):
         return f"Free Funds:{self.ff_amount}, Share Count:{self.share_c}"
@@ -89,23 +93,26 @@ class Lobby:
         self.choices = {}
         self.currentRound = 0
         self.maxRounds = 6
-        self.share =1
-        self.sharePrice = 2
+        self.sharePrice = 1
 
+        self.market_data = []
         stock_data = pd.read_csv('data/historical_closing_prices.csv')
         selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
         #new_round = Round.Round(selected_data, max_val, min_val)
         chunks = split_dataframe(selected_data)
         
         for k in range(len(chunks)):
-            market_data.append([])
+            self.market_data.append([])
             key = chunks[k].keys()[1] if chunks[k].keys()[0]=='Date' else chunks[k].keys()[0]
             #mapped_data[k] = [{'open':list(chunks[k][key])[i], 'close':list(chunks[k][key])[i+1]} for i in range(len(chunks[k])-1)]
             
-            market_data[k] = list(chunks[k][key])
+            self.market_data[k] = list(chunks[k][key])
 
     def has_player(self, player: Player) -> bool:
         return player.sid in [p.sid for p in self.players]
+
+    def get_market_data(self):
+        return self.market_data
 
     def add_player(self, player: Player) -> bool:
         if not self.has_player(player):
@@ -117,6 +124,7 @@ class Lobby:
         self.choices[ply] = (action,amt)
 
     def nextRound(self):
+        self.sharePrice = self.market_data[self.currentRound]
         for ply in list(self.choices.keys()):
             act = self.choices[ply]
             if act[0] == "buy":
@@ -125,6 +133,10 @@ class Lobby:
                 ply.action_sell(int(act[1]),self.sharePrice)
         self.choices = {}
         self.currentRound = self.currentRound +1
+
+        if self.currentRound >= len(self.market_data)-1:
+            pass
+        self.sharePrice = self.market_data[self.currentRound][-1]
 
         return self.currentRound
         

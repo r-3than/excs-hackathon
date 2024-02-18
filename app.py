@@ -80,27 +80,13 @@ def main():
         print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
         return redirect("/")
 
-    selected_data = None
-    if selected_data is None:
-        # Data has not been selected yet, so select it
-        stock_data = pd.read_csv('data/historical_closing_prices.csv')
-        selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
-        #new_round = Round.Round(selected_data, max_val, min_val)
-        chunks = split_dataframe(selected_data)
-        
-        for k in range(len(chunks)):
-            market_data.append([])
-            key = chunks[k].keys()[1] if chunks[k].keys()[0]=='Date' else chunks[k].keys()[0]
-            #mapped_data[k] = [{'open':list(chunks[k][key])[i], 'close':list(chunks[k][key])[i+1]} for i in range(len(chunks[k])-1)]
-            
-            market_data[k] = list(chunks[k][key])
-    else:
-        # Data has already been selected, no need to run select_round_data again
-        pass 
-    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
-    plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
+    code = session.get("code", None)
+    for lob in lobbies:
+        if lob.code == code:
+            return render_template("main.html",market_data=lob.get_market_data())
+    return redirect("/")
 
-    return render_template("main.html",market_data=market_data)
+    
 
 
 
