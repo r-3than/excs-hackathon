@@ -1,4 +1,5 @@
-from classes import Player
+from random import randint
+from classes import Lobby, Player
 from flask import Flask, jsonify, request, render_template
 import Account
 import Round
@@ -25,62 +26,90 @@ max_val = None
 min_val = None
 
 players = []
+lobbies = []
 
-
-@app.route('/')
-def index():
-    global selected_data
-    global chunks
-    global max_val
-    global min_val
-    # Check if data has already been selected
-    if selected_data is None:
-        # Data has not been selected yet, so select it
-        stock_data = pd.read_csv('data/historical_closing_prices.csv')
-        selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
-        new_round = Round.Round()
-        chunks = split_dataframe(selected_data)
-    else:
-        # Data has already been selected, no need to run select_round_data again
-        pass 
-    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
-    plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
-    #return render_template('index.html', plot_base64 = plot_base64)
-    #return render_template('logo.html')
-    return render_template('main.html')
 
 @app.route('/ff_amount')
 def get_ff_amount():
     return jsonify({'ff_amount': user_account.ff_amount}), 200
-
-@app.route('/buy', methods=['POST'])
-def buy_stock():
-    global ff_amount
-    data = request.get_json()
-    amount = data.get('amount', 0)
-    if amount <= 0:
-        return jsonify({'error': 'Invalid amount to buy.'}), 400
-    # Perform buy operation here
-    if user_account.action_buy(amount, share_value) != "Insufficient funds":
-        ff_amount -= amount
-        return jsonify({'message': f'You bought stocks for {amount} FF.', 'ff_amount': ff_amount}), 200
-    else:
-        return jsonify({'message': "Insufficient funds"})
-
-@app.route('/sell', methods=['POST'])
-def sell_stock():
-    global ff_amount
-    data = request.get_json()
-    amount = data.get('amount', 0)
-    if amount <= 0:
-        return jsonify({'error': 'Invalid amount to sell.'}), 400
-    # Perform sell operation here
-    if user_account.action_sell(amount, share_value) != "Insufficient funds":
-        ff_amount += amount
-        return jsonify({'message': f'You sold stocks for {amount} FF.', 'ff_amount': ff_amount}), 200
-    else:
-        return jsonify({'message': "Insufficient funds"})
     
+@app.route('/')
+def index():
+    print("Homepage request made")
+    # Homepage
+    return render_template('home.html', async_mode=socketio.async_mode)
+
+
+@app.route("/main", methods=["POST"])
+def main():
+    return render_template("main.html")
+
+@app.route('/pregame', methods=["GET", "POST"])
+def pregame():
+    # Joins a pregame lobby
+    print("Join lobby request made")
+
+    # Just created a game
+    if request.method == "GET":
+        code = session.get("code", None)
+        is_lobby_leader = True
+    # Joining an existing game
+    else:
+        code = request.form.get("codeInput", None)
+        display_name = request.form.get("nameInput", "Player")
+        print(f"Join req: joiner has set session variable as code {code}")
+        session["code"] = code
+        session["display_name"] = display_name
+        is_lobby_leader = False
+
+    if code is None:
+        print("Join req: no code found!")
+        return redirect("/")
+
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    if lobby is None:
+        print(f"Join req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        return redirect("/")
+
+    assert isinstance(lobby, Lobby)
+
+    # TODO known issue with duplicates
+    player_names = [p.display_name for p in lobby.players]
+    print(f"Join req: players in lobby {code} are {player_names}")
+
+    return render_template("pregame.html", players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode)
+
+
+@app.route('/create_lobby', methods=["POST"])
+def create_lobby():
+    # Creates a new lobby then sends the user to join it
+    print("Create lobby request made")
+    code = randint(1000, 9999)
+    while any(lobby for lobby in lobbies if lobby.code == code):
+        code = randint(1000, 9999)
+
+    lobby = Lobby(code)
+    lobbies.append(lobby)
+    print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
+
+    session["code"] = code
+    session["display_name"] = request.form["nameInput"]
+
+    return redirect(url_for("pregame"))
+
+
+@app.route("/find_lobby", methods=["POST"])
+def find_lobby():
+    # Used to handle the form and decide which action to take
+    print("Load lobby request made")
+    code = request.form.get("codeInput", "")
+    if code == "":
+        return redirect(url_for("create_lobby"), 307) # Code 307 passes the POST data along with the reroute
+    elif len(code) == 4 and code.isdecimal():
+        return redirect(url_for("pregame"), 307)
+    else:
+        return redirect("/")
+
 
 
 @socketio.event
@@ -91,6 +120,44 @@ def connect():
 
     emit('my_response', {'data': 'Connected', 'count': 0})
 
+
+@socketio.event
+def joinLobby(message):
+    # Gets called by each client when they first load the pregame page
+    print(f"Conn event: triggered by {request.sid}")
+    code = session.get("code", None)
+
+    if code is None:
+        print("Conn event: No lobby code set as session variable!")
+        return redirect("/")
+
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+
+    if lobby is None:
+        print(f"Conn event: {request.sid} has been unable to find a lobby with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        return redirect('/')
+
+    assert isinstance(lobby, Lobby)
+
+    print(f"Conn event: {request.sid} has found lobby {lobby.code}")
+
+    player = Player(request.sid,message["data"], session.get("display_name", "Player"))
+
+    if lobby.add_player(player):
+        print(f"Conn event: {request.sid} has been added to {lobby.code}")
+    else:
+        print(f"Conn event: {request.sid} is already in {lobby.code}!")
+
+    message = {"room": str(code)}
+    player_name = session.get("display_name", "Player")
+
+    print(f"Conn event: {request.sid} is calling join event with message {message}")
+
+    join(message)
+
+    print(f"Conn event: {request.sid} should have called join event")
+    for ply in lobby.players:
+        emit('newPlayerJoined', {'data': player_name},to=ply.sid)
 
 @socketio.event
 def getPlayer(message):
