@@ -12,6 +12,7 @@ async_mode = None
 
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "xyz"
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
