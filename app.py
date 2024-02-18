@@ -60,9 +60,9 @@ def index():
 
 @app.route("/main", methods=["GET", "POST"])
 def main():
-    # if request.method == "GET":
-    #     code = session.get("code", None)
-    #     print(f"Main req: loading main for lobby {code}!")
+    session_key = request.cookies.get("seshKey", None)
+    code = session.get("code", None)
+    print(f"{session_key} -> Main req: loading main for lobby {code}!")
 
     #     if code is None:
     #         print("Main req: no code found!")
@@ -75,7 +75,7 @@ def main():
 
     #     assert(isinstance(lobby, Lobby))
 
-    #     session_key = request.cookies.get("seshKey", None)
+    
 
     #     if not session_key in [p.session_id for p in lobby.players]:
     #         print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
@@ -84,8 +84,9 @@ def main():
     # return render_template("main.html",market_data=lobby.get_market_data(), ticker='ReefRaveDelicacies')
     code = session.get("code", None)
     for lob in lobbies:
+        print(lob.code,code)
         if str(lob.code) == str(code):
-            return render_template("main.html",market_data=lob.get_market_data(), ticker='ReefRaveDelicacies')
+            return render_template("main.html",market_data=lob.get_market_data(),ticker='ReefRaveDelicacies')
     return redirect("/")
 
 
@@ -239,11 +240,12 @@ def joinLobby(message):
 
     #print(f"Conn event: {request.sid} is calling join event with message {message}")
 
-    join(message)
+    #join(message)
 
     #print(f"Conn event: {request.sid} should have called join event")
     for ply in lobby.players:
-        emit('newPlayerJoined', {'data': player_name},to=ply.sid)
+        if ply.sid != request.sid:
+            emit('newPlayerJoined', {'data': player_name},to=ply.sid)
 
 
 

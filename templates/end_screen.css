@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
+
+/* whitesmoke, blue */
+/* 16161d */
+
+body{
+    padding: 0;
+    margin: 0;
+    background-color: #16161d;
+}
+
+.container{
+    height: 70vh;
+    width: max(40vw, 600px);
+    min-width: 600px ;
+    min-height: 600px ;
+    background-color: #16161d;
+    position: absolute;
+    margin: auto;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.place_box{
+    width: 80%;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.logo p{
+    width: 100%;
+    height:500px;
+    line-height: 500px;
+    font-family: "Sen", sans-serif ;
+    font-optical-sizing: auto;
+    font-size: 6rem;
+    font-weight: 600;
+    position: relative;
+    margin: auto;
+    text-align: center;
+    color: whitesmoke;
+
+}
+
+
+.fish{
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    /* border: 1px solid black */
+    transform: rotate(43deg);
+}
+
+.fishy{
+    position: relative;
+    margin: auto;
+    transform: scale(2) rotate(43deg);
+    margin-left: 2px;
+    margin-right: 2px;
+}
+#fishy{
+    background-color: #DAA520;
+}
+#fishy_t{
+    border-top: 30px solid #DAA520;
+}
+
+.swishy{
+    position: relative;
+    margin: auto;
+    transform: scale(1.5) rotate(43deg);
+    margin-left: 2px;
+    margin-right: 2px;
+}
+#swishy{
+    background-color: #C0C0C0;
+}
+#swishy_t{
+    border-top: 30px solid #C0C0C0;
+}
+
+.mishy{
+    position: relative;
+    margin: auto;
+    transform: scale(1.2) rotate(43deg);
+    margin-left: 2px;
+    margin-right: 2px;
+}
+#mishy{
+    background-color: #CD7F32;
+}
+#mishy_t{
+    border-top: 30px solid #CD7F32;
+}
+
+
+.usishy{
+    position: relative;
+    margin: auto;
+    transform: scale(0.6) rotate(43deg);
+    margin-left: 20px;
+    margin-right: 2px;
+}
+#usishy{
+    background-color: green;
+}
+#usishy_t{
+    border-top: 30px solid green;
+}
+
+
+.f_head{
+    background-color: green;
+    border-radius: 50% 50% 50% 50% / 100% 100% 0% 0% ;
+    position: absolute;
+    top:10px;
+    right: 5px;
+    height: 30px;
+    width: 40px;
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+
+.f_body{
+    background-color: green;
+    border-radius: 50% 50% 50% 50% / 100% 100% 0% 0% ;
+    position: absolute;
+    top:29px;
+    right:29px;
+    height: 40px;
+    width: 40px;
+    transform: rotate(-135deg);  
+    z-index: -1;
+}
+
+.f_tail{
+    position: absolute;
+    width: 0; 
+    height: 0; 
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+  
+    border-top: 30px solid green;
+    transform: rotate(-135deg);  
+    top: 44px;
+    right:33px;
+}
+
+.f_eye{
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: black;
+    top: 18px;
+    left: 10px;
+}
+
+
+
+p{
+    font-family: 'Sen';
+    color: whitesmoke;
+    font-size: 3rem;
+}
+
+#loser_text{
+    font-size: 2rem;
+}
