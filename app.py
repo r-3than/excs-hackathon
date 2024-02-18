@@ -83,7 +83,7 @@ def main():
     code = session.get("code", None)
     for lob in lobbies:
         if lob.code == code:
-            return render_template("main.html",market_data=lob.get_market_data())
+            return render_template("main.html",market_data=lob.get_market_data(),ticker='ReefRaveDelicacies')
     return redirect("/")
 
     
