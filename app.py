@@ -217,7 +217,7 @@ def action(message):
     # Part of the example, just an echo event
     print(f"Echo event triggered by {request.sid}")
     print(message)
-    print(message["data"])
+    print(message["action"])
 
 
 
