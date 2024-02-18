@@ -33,7 +33,7 @@
             });
             socket.on('newPlayerJoined', function(msg) {
                 
-                document.getElementById("changeMe").innerHTML = document.getElementById("changeMe").innerHTML + msg.data +"\n" ;
+                document.getElementById("changeMe").innerHTML = '\n' + msg.data.join('\n') + '\n';
 
             });
             socket.on('beginGame', function(msg, cb) {
