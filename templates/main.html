@@ -42,6 +42,7 @@
                 stockValue.innerHTML = tickerNoCaps + " Stock Held: "  + msg.stock;
                 document.getElementById("freeFunds").innerHTML = "Free Funds: " + msg.ff;
                 clearInterval(timerloop);
+                secondsleft = 20;
             })
             let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
             let stockValue = document.getElementById("stockHeld")
@@ -215,7 +216,7 @@
 // Update the count down every 1 second
     var secondsleft;
         function gameLoop(index){
-            secondsleft = 5;
+            secondsleft = 20;
             nextGraph(index); // when does thomas does his thing lobby created show graph
             timerloop = setInterval(function() { // timer shit
 
