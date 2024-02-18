@@ -187,6 +187,7 @@ def getPlayer(message):
     for ply in players:
         if message["data"] == ply.session_id:
             found = True
+            ply.sid = request.sid
     if found == True:
         emit('getKey', {'data': message["data"]}) #update token for another 7 days to the client
         return #dont create new key
