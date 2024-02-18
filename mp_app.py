@@ -173,6 +173,9 @@ def my_event(message):
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']})
 
+@socketio.event
+def empty():
+    pass
 
 
 

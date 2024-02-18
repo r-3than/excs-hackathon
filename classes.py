@@ -1,5 +1,8 @@
+import uuid
+
 class Player:
-    def __init__(self, sid: str, display_name: str) -> None:
+    def __init__(self, sid: str, cookie_id:str, display_name: str) -> None:
+        self.session_id = cookie_id
         self.sid = sid
         self.display_name = display_name
 
