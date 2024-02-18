@@ -123,7 +123,7 @@
             } else {
                 console.log(buyInput.value);
                 // TODO call buy function
-                socket.emit('action', {"action": 'buy',"qty":buyInput.value,"lobby_code":"CHANGE ME PLS"});
+                socket.emit('action', {"action": 'buy',"qty":buyInput.value,"lobby_code":"{{ session['code'] }}" });
                 resetBuy()
                 resetSell()
                 resetWait()
@@ -151,7 +151,7 @@
             } else {
                 console.log(sellInput.value);
                 // TODO call sell function
-                socket.emit('action', {"action": 'sell',"qty":buyInput.value,"lobby_code":"CHANGE ME PLS"});
+                socket.emit('action', {"action": 'sell',"qty":buyInput.value,"lobby_code":"{{ session['code'] }}" });
                 resetBuy()
                 resetSell()
                 resetWait()
@@ -174,7 +174,7 @@
                 resetSell()
             } else {
                 console.log('wait');
-                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"CHANGE ME PLS"});
+                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"{{ session['code'] }}" });
             }
         }
 
@@ -200,7 +200,7 @@
             // If the count down is finished, write some text
             if (secondsleft < 0) {
                 clearInterval(x);
-                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"CHANGE ME PLS"});
+                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"{{ session['code'] }}" });
             }}, 1000
             );
             
