@@ -86,78 +86,57 @@ h1 {
     width: 100%;
 }
 
-.main.box.action button {
+
+.main.box.action, .main.box.multiplayer button {
     background-color: var(--primary);
     color: var(--secondary);
     border-radius: 0.2rem;
     border: none;
-    width: 95%;
     height: 1.7rem;
+}
+
+.main.box.action, .main.box.multiplayer input {
+    background-color: var(--background);
+    border: none;
+    border-radius: 0.2rem;
+    height: 1.5rem;
+}
+
+
+.main.box.action button {
+    width: 95%;
     transition: 1s;
 }
 
 .main.box.action input {
-    background-color: var(--background);
-    border: none;
-    border-radius: 0.2rem;
     width: 0%;
-    height: 1.5rem;
-    /*display: none;*/
     pointer-events: none;
     transition: 1s;
 }
 
-/*
-.main.graphWrapper.box {
-    background-color: var(--primary);
-    height: 10rem;
-    width: 100%;
-}
-
-.main.dashboardWrapper {
-    justify-content: space-around;
-    flex-wrap: wrap;
-    align-items: center;
-    display: flex;
-    background-color: var(--background);
-    height: auto;
-    padding: 0px;
-}
-
-.main.dashboardWrapper.account {
-    align-items: center;
-    padding: 2%;
-    background-color: var(--secondary);
-    margin: auto;
-    height: 5.5rem;
-    width: 45%;
-}
-
-.main.dashboardWrapper.actions {
-    align-items: center;
-    padding: 2%;
-    background-color: var(--tertiary);
-    margin: auto;
-    height: 5.5rem;
+.main.box.multiplayer {
+    color: var(--secondary);
     width: 25%;
 }
 
-.main.dashboardWrapper.actions button {
-    border: none;
-    /*color: var(--secondary);
-    background-color: var(--primary);
+.main.box.multiplayer input {
+    width: 98%;
+    height: 2rem;
+    color: var(--secondary);
+    border-color: var(--secondary);
+    border-style: solid;
     text-align: center;
-    padding: 0.2rem;
-    margin: 0.2rem 0rem;
-    /*font-size: 16px;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    border-style: groove;
-    border-color: var(--primary);
-    width: 95%;
+    font-size: large;
 }
 
-.main.dashboardWrapper.actions input {
-    width: 0%;
+.main.box.multiplayer button {
+    width: 100%;
+    transition: 0.6s;
+    margin-top: 3rem;
 }
-*/
+
+.main.box.multiplayer button:hover {
+    transform: scale(1.5);
+    width: 50%;
+    transition: 0.6s;
+}

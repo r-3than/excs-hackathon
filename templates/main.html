@@ -127,14 +127,6 @@
         function nextGraph(base64string) {
             if(graphs[graphCount-1].style.display!="inline") {
                 for(var x=0; x<graphCount; x++) {
-                    /*console.log(graphs[x])
-                    console.log(graphs[x].style)
-                    if(graphs[x].style.display=="") {
-                        graphs[x].style.display = "inline";
-                        k = x;
-                        break;
-                    }*/
-                    //console.log(graphs[x].src)
                     if(graphs[x].src=="") {
                         graphs[x].style.opacity = "1";
                         graphs[x].src = "data:image/png;base64,"+base64string;

@@ -20,10 +20,10 @@ min_val = None
 
 @app.route('/')
 def index():
-    #global selected_data
-    #global chunks
-    #global max_val
-    #global min_val
+    global selected_data
+    global chunks
+    global max_val
+    global min_val
     # Check if data has already been selected
     if selected_data is None:
         # Data has not been selected yet, so select it
@@ -37,6 +37,7 @@ def index():
     plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
     plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
     #return render_template('index.html', plot_base64 = plot_base64)
+    return render_template('lobby.html')
     return render_template('main.html')
 
 @app.route('/ff_amount')
