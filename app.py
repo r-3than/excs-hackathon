@@ -22,6 +22,7 @@ user_account = Account.Account("token1",'Joe', ff_amount)
 tickers = ['AMZN', 'MSFT', 'BA', 'PFE', 'NKE']
 selected_data = None
 chunks = []
+market_data = []
 max_val = None
 min_val = None
 
