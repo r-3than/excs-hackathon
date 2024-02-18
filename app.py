@@ -375,9 +375,11 @@ def action(message):
     #print(f"Echo event triggered by {request.sid}")
     #print(message)
     found = False
+    currentPlayer = None
     for ply in players:
         if ply.session_id == request.cookies.get("seshKey"):
                 found = True
+                currentPlayer = ply
                 break
     if found == False:
         return
@@ -396,11 +398,11 @@ def action(message):
                 #print("^^")
                 #print(lob.players)
                 for upply in lob.players:
-                    #print("SENDING TO",upply.display_name)
+                    print("SENDING TO",upply.display_name)
                     emit("show_round",{"data":next_graph,"stock":upply.share_c,"ff":upply.ff_amount},to=upply.sid)
-                    #print("I WANT TO SEND TO ",upply.sid)
+                    print("I WANT TO SEND TO ",upply.sid)
             else:
-                lob.setChoice(ply,message["action"],message["qty"])
+                lob.setChoice(currentPlayer,message["action"],message["qty"])
 
 
 
