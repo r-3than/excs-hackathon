@@ -124,19 +124,20 @@ class Lobby:
         self.choices[ply] = (action,amt)
 
     def nextRound(self):
-        self.sharePrice = self.market_data[self.currentRound]
         for ply in list(self.choices.keys()):
             act = self.choices[ply]
+            print(type(self.sharePrice),"TYPE",self.sharePrice)
             if act[0] == "buy":
-                ply.action_buy(int(act[1]),self.sharePrice)
+                ply.action_buy(int(act[1]),int(self.sharePrice))
             if act[0] == "sell":
-                ply.action_sell(int(act[1]),self.sharePrice)
+                ply.action_sell(int(act[1]),int(self.sharePrice))
         self.choices = {}
         self.currentRound = self.currentRound +1
 
         if self.currentRound >= len(self.market_data)-1:
-            pass
+            return -1
         self.sharePrice = self.market_data[self.currentRound][-1]
+        print(self.sharePrice)
 
         return self.currentRound
         

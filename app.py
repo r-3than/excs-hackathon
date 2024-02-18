@@ -36,7 +36,7 @@ def get_ff_amount():
     
 @app.route('/')
 def index():
-    print("Homepage request made")
+    #print("Homepage request made")
     # Homepage
     return render_template('home.html', async_mode=socketio.async_mode)
 
@@ -54,7 +54,7 @@ def main():
 @app.route('/pregame', methods=["GET", "POST"])
 def pregame():
     # Joins a pregame lobby
-    print("Join lobby request made")
+    #print("Join lobby request made")
 
     # Just created a game
     if request.method == "GET":
@@ -64,25 +64,25 @@ def pregame():
     else:
         code = request.form.get("codeInput", None)
         display_name = request.form.get("nameInput", "Player")
-        print(f"Join req: joiner has set session variable as code {code}")
+        #print(f"Join req: joiner has set session variable as code {code}")
         session["code"] = code
         session["display_name"] = display_name
         is_lobby_leader = False
 
     if code is None:
-        print("Join req: no code found!")
+        #print("Join req: no code found!")
         return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
     if lobby is None:
-        print(f"Join req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        #print(f"Join req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
         return redirect("/")
 
     assert isinstance(lobby, Lobby)
 
     # TODO known issue with duplicates
     player_names = [p.display_name for p in lobby.players]
-    print(f"Join req: players in lobby {code} are {player_names}")
+    #print(f"Join req: players in lobby {code} are {player_names}")
 
     return render_template("pregame.html", players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode)
 
@@ -90,14 +90,14 @@ def pregame():
 @app.route('/create_lobby', methods=["POST"])
 def create_lobby():
     # Creates a new lobby then sends the user to join it
-    print("Create lobby request made")
+    #print("Create lobby request made")
     code = randint(1000, 9999)
     while any(lobby for lobby in lobbies if lobby.code == code):
         code = randint(1000, 9999)
 
     lobby = Lobby(code)
     lobbies.append(lobby)
-    print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
+    #print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
 
     session["code"] = code
     session["display_name"] = request.form["nameInput"]
@@ -108,7 +108,7 @@ def create_lobby():
 @app.route("/find_lobby", methods=["POST"])
 def find_lobby():
     # Used to handle the form and decide which action to take
-    print("Load lobby request made")
+    #print("Load lobby request made")
     code = request.form.get("codeInput", "")
     if code == "":
         return redirect(url_for("create_lobby"), 307) # Code 307 passes the POST data along with the reroute
@@ -123,7 +123,7 @@ def find_lobby():
 def connect():
     # Gets called by each client when they first load the game page
 
-    print(f"Conn event: triggered by {request.sid}")
+    #print(f"Conn event: triggered by {request.sid}")
 
     emit('my_response', {'data': 'Connected', 'count': 0})
 
@@ -131,22 +131,22 @@ def connect():
 @socketio.event
 def joinLobby(message):
     # Gets called by each client when they first load the pregame page
-    print(f"Conn event: triggered by {request.sid}")
+    #print(f"Conn event: triggered by {request.sid}")
     code = session.get("code", None)
 
     if code is None:
-        print("Conn event: No lobby code set as session variable!")
+        #print("Conn event: No lobby code set as session variable!")
         return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
 
     if lobby is None:
-        print(f"Conn event: {request.sid} has been unable to find a lobby with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        #print(f"Conn event: {request.sid} has been unable to find a lobby with code {code}! Lobbies are: {[l.code for l in lobbies]}")
         return redirect('/')
 
     assert isinstance(lobby, Lobby)
 
-    print(f"Conn event: {request.sid} has found lobby {lobby.code}")
+    #print(f"Conn event: {request.sid} has found lobby {lobby.code}")
     
 
     player = Player(request.sid,message["data"], session.get("display_name", "Player"))
@@ -162,11 +162,11 @@ def joinLobby(message):
     message = {"room": str(code)}
     player_name = session.get("display_name", "Player")
 
-    print(f"Conn event: {request.sid} is calling join event with message {message}")
+    #print(f"Conn event: {request.sid} is calling join event with message {message}")
 
     join(message)
 
-    print(f"Conn event: {request.sid} should have called join event")
+    #print(f"Conn event: {request.sid} should have called join event")
     for ply in lobby.players:
         emit('newPlayerJoined', {'data': player_name},to=ply.sid)
 
@@ -174,14 +174,14 @@ def joinLobby(message):
 def getPlayer(message):
     # Gets called by each client when they first load the game page
     key=message["data"]
-    print(f"I AM {key  } currently this sid {request.sid}")
+    #print(f"I AM {key  } currently this sid {request.sid}")
     found = False
     for ply in players:
         if message["data"] == ply.session_id:
-            print(f"{ply.sid} -> current {request.sid}")
+            #print(f"{ply.sid} -> current {request.sid}")
             found = True
             ply.sid = request.sid
-            print(f"CHANGEEEE {ply.sid} -> current {request.sid}")
+            #print(f"CHANGEEEE {ply.sid} -> current {request.sid}")
     if found == True:
         emit('getKey', {'data': message["data"]}) #update token for another 7 days to the client
         return #dont create new key
@@ -191,17 +191,17 @@ def getPlayer(message):
     player = Player(request.sid,cookieUuid, session.get("display_name", "Player"))
     players.append(player)
 
-    print(f"Conn event: triggered by {cookieUuid}")
+    #print(f"Conn event: triggered by {cookieUuid}")
 
     emit('getKey', {'data': cookieUuid})
 
 @socketio.event
 def join(message):
     # This is what actually puts a client into a room
-    print(f"Join event triggered by {request.sid}")
+    #print(f"Join event triggered by {request.sid}")
     join_room(message['room'])
     session['receive_count'] = session.get('receive_count', 0) + 1
-    print(rooms())
+    #print(rooms())
     emit('my_response',
          {'data': 'In rooms: ' + ', '.join(rooms()),
           'count': session['receive_count']})
@@ -211,7 +211,7 @@ def join(message):
 @socketio.event
 def my_room_event(message):
     # This is part of the example app, used to send a message to the room
-    print(f"Room message event triggered by {request.sid}")
+    #print(f"Room message event triggered by {request.sid}")
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']},
@@ -220,7 +220,7 @@ def my_room_event(message):
 @socketio.event
 def my_event(message):
     # Part of the example, just an echo event
-    print(f"Echo event triggered by {request.sid}")
+    #print(f"Echo event triggered by {request.sid}")
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']})
@@ -230,8 +230,8 @@ def my_event(message):
 @socketio.event
 def action(message):
     # Part of the example, just an echo event
-    print(f"Echo event triggered by {request.sid}")
-    print(message)
+    #print(f"Echo event triggered by {request.sid}")
+    #print(message)
     found = False
     for ply in players:
         if ply.session_id == request.cookies.get("seshKey"):
@@ -242,18 +242,18 @@ def action(message):
     if not str(message["qty"]).isnumeric():
         return
     for lob in lobbies:
-        print("LOB CODES",lob.code)
-        print("user CODES",message["lobby_code"])
+        #print("LOB CODES",lob.code)
+        #print("user CODES",message["lobby_code"])
         if str(message["lobby_code"]) == str(lob.code):
 
             if message["action"] == "end":
                 next_graph=lob.nextRound()
-                print("^^")
-                print(lob.players)
+                #print("^^")
+                #print(lob.players)
                 for upply in lob.players:
-                    print("SENDING TO",upply.display_name)
+                    #print("SENDING TO",upply.display_name)
                     emit("show_round",{"data":next_graph,"stock":upply.share_c,"ff":upply.ff_amount},to=upply.sid)
-                    print("I WANT TO SEND TO ",upply.sid)
+                    #print("I WANT TO SEND TO ",upply.sid)
             else:
                 lob.setChoice(ply,message["action"],message["qty"])
 
