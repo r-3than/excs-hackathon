@@ -34,11 +34,10 @@ def index():
     else:
         # Data has already been selected, no need to run select_round_data again
         pass 
-    plot_buffer_1 = plot_stock_prices(chunks[0], 'ReefRaveDelicacies', max_val, min_val)
-    plot_base64_1 = base64.b64encode(plot_buffer_1.getvalue()).decode('utf-8')
-    plot_buffer_2 = plot_stock_prices(chunks[1], 'ReefRaveDelicacies', max_val, min_val)
-    plot_base64_2 = base64.b64encode(plot_buffer_2.getvalue()).decode('utf-8')
-    return render_template('index.html', plot_base64_1 = plot_base64_1, plot_base64_2 = plot_base64_2)
+    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies')
+    plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
+    #return render_template('index.html', plot_base64 = plot_base64)
+    return render_template('main.html')
 
 @app.route('/ff_amount')
 def get_ff_amount():
@@ -72,6 +71,5 @@ def sell_stock():
     else:
         return jsonify({'message': "Insufficient funds"})
 
-
 if __name__ == '__main__':
-    app.run(host='localhost', port=3000, debug=True)
+    app.run(host='localhost', port=3000)#, debug=True)
