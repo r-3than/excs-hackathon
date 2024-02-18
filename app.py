@@ -6,8 +6,8 @@ import Round
 import pandas as pd
 import base64
 from data_util import select_round_data, split_dataframe, plot_stock_prices#, plot_stock_prices3
-from flask import Flask, render_template, session, request, \
-    copy_current_request_context, redirect, url_for
+from flask import Flask, render_template, request, \
+    copy_current_request_context, redirect, url_for, make_response
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 import uuid
@@ -60,11 +60,32 @@ def index():
 
 @app.route("/main", methods=["GET", "POST"])
 def main():
-    code = session.get("code", None)
+    session_key = request.cookies.get("seshKey", None)
+    code = request.cookies.get("code", None)
+    print(f"{session_key} -> Main req: loading main for lobby {code}!")
+
+    if code is None:
+        print("Main req: no code found!")
+        return redirect("/")
+
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    if lobby is None:
+        print(f"Main req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        return redirect("/")
+
+    assert(isinstance(lobby, Lobby))
+
+    
+
+    if not session_key in [p.session_id for p in lobby.players]:
+        print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
+        return redirect("/")
+
+    code = request.cookies.get("code", None)
     for lob in lobbies:
         print(lob.code,code)
         if str(lob.code) == str(code):
-            return render_template("main.html",market_data=lob.get_market_data(),ticker='ReefRaveDelicacies')
+            return render_template("main.html",market_data=lob.get_market_data(),ticker='ReefRaveDelicacies',code=code)
     return redirect("/")
 
 
@@ -79,17 +100,19 @@ def pregame():
     # Joins a pregame lobby
     print("Join lobby request made")
 
+    tempCODE = None
+    tempDISP = None
     # Just created a game
     if request.method == "GET":
-        code = session.get("code", None)
+        code = request.cookies.get("code", None)
         is_lobby_leader = True
     # Joining an existing game
     else:
         code = request.form.get("codeInput", None)
         display_name = request.form.get("nameInput", "Player")
-        print(f"Join req: joiner has set session variable as code {code}")
-        session["code"] = code
-        session["display_name"] = display_name
+        #print(f"Join req: joiner has set request.cookies. variable as code {code}")
+        tempCODE=code
+        tempDISP= display_name
         is_lobby_leader = False
 
     if code is None:
@@ -107,7 +130,12 @@ def pregame():
     player_names = [p.display_name for p in lobby.players]
     print(f"Join req: players in lobby {code} are {player_names}")
 
-    return render_template("pregame.html", players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode)
+    resp=make_response(render_template("pregame.html",code=code, players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode))
+    if tempCODE != None:
+        resp.set_cookie("code",tempCODE)
+    if tempDISP != None:
+        resp.set_cookie("display_name",tempDISP)
+    return resp
 
 
 
@@ -122,12 +150,14 @@ def create_lobby():
 
     lobby = Lobby(code)
     lobbies.append(lobby)
-    print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
+    #print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
 
-    session["code"] = code
-    session["display_name"] = request.form["nameInput"]
+    resp = make_response(redirect(url_for("pregame")))
 
-    return redirect(url_for("pregame"))
+    resp.set_cookie("code", str(code))
+    resp.set_cookie("display_name",request.form["nameInput"])
+
+    return resp
 
 
 
@@ -146,7 +176,15 @@ def find_lobby():
 
 
 
+@app.route('/endgame', methods=["GET", "POST"])
+def endgame():
 
+    # remove from session
+
+    # get lobby code
+    # find the lobby with players
+
+    return render_template("end_screen.html", u_position =5, async_mode=socketio.async_mode)
 
 
 
@@ -181,11 +219,11 @@ def connect():
 @socketio.event
 def joinLobby(message):
     # Gets called by each client when they first load the pregame page
-    print(f"Conn event: triggered by {request.sid}")
-    code = session.get("code", None)
+    #print(f"Conn event: triggered by {request.sid}")
+    code = request.cookies.get("code", None)
 
     if code is None:
-        print("Conn event: No lobby code set as session variable!")
+        #print("Conn event: No lobby code set as request.cookies. variable!")
         return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
@@ -196,9 +234,10 @@ def joinLobby(message):
 
     assert isinstance(lobby, Lobby)
 
-    print(f"Conn event: {request.sid} has found lobby {lobby.code}")
+    #print(f"Conn event: {request.sid} has found lobby {lobby.code}")
+    
 
-    #player = Player(request.sid, message["data"], session.get("display_name", "Player"))
+    player = Player(request.sid, message["data"], request.cookies.get("display_name", "Player"))
     for ply in players:
         if request.cookies.get("seshKey") == ply.session_id:
             player = ply
@@ -209,8 +248,17 @@ def joinLobby(message):
     if lobby.add_player(player):
         print(f"Conn event: {player.display_name} has been added to {lobby.code}")
     else:
-        print(f"Conn event: {player.display_name} is already in {lobby.code}!")
-   
+        print(f"Conn event: {request.sid} is already in {lobby.code}!")
+
+    message = {"room": str(code)}
+    player_name = request.cookies.get("display_name", "Player")
+
+    #print(f"Conn event: {request.sid} is calling join event with message {message}")
+
+    #join(message)
+
+    #print(f"Conn event: {request.sid} should have called join event")
+    
     player_names = []
     for ply in lobby.players:
         player_names.append(ply.display_name)
@@ -245,7 +293,7 @@ def getPlayer(message):
     # If player didnt exist, generate them a session key and create them
     print(f"Player for sid {request.sid} did not already exist so generating them a perma session key")
     cookieUuid = str(uuid.uuid4())
-    player = Player(request.sid, cookieUuid, session.get("display_name", "Player"))
+    player = Player(request.sid,cookieUuid, request.cookies.get("display_name", "Player"))
     players.append(player)
 
     emit('getKey', {'data': cookieUuid})
@@ -258,10 +306,10 @@ def getPlayer(message):
 @socketio.event
 def beginGame():
     print(f"Bg event: triggered by {request.sid}")
-    code = session.get("code", None)
+    code = request.cookies.get("code", None)
 
     if code is None:
-        print("Bg event: No lobby code set as session variable!")
+        print("Bg event: No lobby code set as request.cookies. variable!")
         return redirect("/")
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
@@ -279,6 +327,45 @@ def beginGame():
 
 
 
+
+
+
+
+
+
+@socketio.event
+def join(message):
+    # This is what actually puts a client into a room
+    #print(f"Join event triggered by {request.sid}")
+    join_room(message['room'])
+    #request.cookies.['receive_count'] = request.cookies.get('receive_count', 0) + 1
+    #print(rooms())
+    
+
+
+
+
+@socketio.event
+def my_room_event(message):
+    pass
+    # This is part of the example app, used to send a message to the room
+    #print(f"Room message event triggered by {request.sid}")
+    #request.cookies.['receive_count'] = request.cookies..get('receive_count', 0) + 1
+    #emit('my_response',
+    #     {'data': message['data'], 'count': request.cookies.['receive_count']},
+    #     to=message['room'])
+
+
+
+
+@socketio.event
+def my_event(message):
+    pass
+    # Part of the example, just an echo event
+    #print(f"Echo event triggered by {request.sid}")
+ #   request.cookies.['receive_count'] = request.cookies..get('receive_count', 0) + 1
+  #  emit('my_response',
+#         {'data': message['data'], 'count': request.cookies.['receive_count']})
 
 
 
@@ -303,8 +390,11 @@ def action(message):
 
             if message["action"] == "end":
                 next_graph=lob.nextRound()
-                print("^^")
-                print(lob.players)
+                if(next_graph == -1):
+                    for player in lob.players:
+                        emit("endgame", to=player.sid)
+                #print("^^")
+                #print(lob.players)
                 for upply in lob.players:
                     print("SENDING TO",upply.display_name)
                     emit("show_round",{"data":next_graph,"stock":upply.share_c,"ff":upply.ff_amount},to=upply.sid)

@@ -34,19 +34,27 @@
                 setCookie("seshKey",msg.data,7); //set cookie for 7 days
             });
 
+            socket.on('endgame', function() {
+                
+                setCookie("seshKey",0,0); //set cookie for 7 days
+                window.location.href="{{ url_for('endgame') }}"
+            });
+
 
             socket.on("show_round", function(msg){
+                clearInterval(timerloop);
+                secondsleft = 20;
                 gameLoop(msg.data);
                 let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
                 let stockValue = document.getElementById("stockHeld")
                 stockValue.innerHTML = tickerNoCaps + " Stock Held: "  + msg.stock;
                 document.getElementById("freeFunds").innerHTML = "Free Funds: " + msg.ff;
-                clearInterval(timerloop);
-                secondsleft = 20;
+                
             })
+            secondsleft = 20;
             let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
-            let stockValue = document.getElementById("stockHeld")
-            stockValue.innerHTML = tickerNoCaps + " Stock Held: "  + msg.stock;
+            let stockValue = document.getElementById("stockHeld");
+            stockValue.innerHTML = tickerNoCaps + " Stock Held: 0";
 
         });
     </script>
@@ -74,7 +82,7 @@
         <div class="main wrapper">
             <div class="main box account">
                 <p id="demo"></p>
-                <h2 id="stockHeld">Stock Held:</h2>
+                <h2 id="stockHeld"> Stock Held:</h2>
                 <h2 id="freeFunds">Free Funds: 10000</h2>
             </div>
             <div class="main box action">
@@ -147,7 +155,7 @@
             } else {
                 console.log(buyInput.value);
                 // TODO call buy function
-                socket.emit('action', {"action": 'buy',"qty":buyInput.value,"lobby_code":"{{ session['code'] }}" });
+                socket.emit('action', {"action": 'buy',"qty":buyInput.value,"lobby_code":"{{ code}}" });
                 currentAction.innerHTML = " You are currently buying " + buyInput.value + " " + tickerNoCaps;
                 resetBuy()
                 resetSell()
@@ -176,7 +184,7 @@
             } else {
                 console.log(sellInput.value);
                 // TODO call sell function
-                socket.emit('action', {"action": 'sell',"qty":buyInput.value,"lobby_code":"{{ session['code'] }}" });
+                socket.emit('action', {"action": 'sell',"qty":buyInput.value,"lobby_code":"{{ code }}" });
                 currentAction.innerHTML = "You are currently selling " + buyInput.value + " " + tickerNoCaps;
                 resetBuy()
                 resetSell()
@@ -200,7 +208,7 @@
                 resetSell()
             } else {
                 console.log('wait');
-                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"{{ session['code'] }}" });
+                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"{{ code }}" });
                 currentAction.innerHTML = "You are currently holding " + tickerNoCaps;
 
             }
@@ -216,7 +224,6 @@
 // Update the count down every 1 second
     var secondsleft;
         function gameLoop(index){
-            secondsleft = 20;
             nextGraph(index); // when does thomas does his thing lobby created show graph
             timerloop = setInterval(function() { // timer shit
 
@@ -228,7 +235,7 @@
             // If the count down is finished, write some text
             if (secondsleft <= 0) {
                 clearInterval(timerloop);
-                socket.emit('action', {"action": 'end',"qty":0,"lobby_code":"{{ session['code'] }}" });
+                socket.emit('action', {"action": 'end',"qty":0,"lobby_code":"{{ code}}" });
             }}, 1000
             );
             

@@ -93,7 +93,7 @@ class Lobby:
         self.choices = {}
         self.currentRound = 0
         self.maxRounds = 6
-        self.sharePrice = 1
+        
 
         self.market_data = []
         stock_data = pd.read_csv('data/historical_closing_prices.csv')
@@ -107,6 +107,7 @@ class Lobby:
             #mapped_data[k] = [{'open':list(chunks[k][key])[i], 'close':list(chunks[k][key])[i+1]} for i in range(len(chunks[k])-1)]
             
             self.market_data[k] = list(chunks[k][key])
+        self.sharePrice = self.market_data[0][-1]
 
     def has_player(self, player: Player) -> bool:
         return player.session_id in [p.session_id for p in self.players]

@@ -41,6 +41,7 @@
             <p>Mishy</p>
         </div>
 
+        {% if u_position < 3 %}
         <div class="place_box">
             <div class="fish usishy">
                 <div class="f_head" id="usishy">
@@ -49,11 +50,20 @@
                 <div class="f_body" id="usishy"></div>
                 <div class="f_tail" id="usishy_t"></div>
             </div>
-            <p id="loser_text">You came 97th</p>
+            <p id="loser_text">You came {{u_position}}th</p>
         </div>
-        <!-- <div class="logo">
-            <p>FishFolio</p>
-        </div> -->
+        {% endif %}
+
+        <button id="goHome" href="/" onclick="goHome()">Go Home</button>
+
     </div>
 </body>
+
+<script>
+    function goHome(){
+        console.log('user end game and goes home');
+    }
+
+
+</script>
 </html>

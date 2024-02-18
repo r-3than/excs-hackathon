@@ -1,7 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
 
-/* whitesmoke, blue */
-/* 16161d */
+:root {
+    --background: #16161D;
+    --primary: #5BA551;
+    --secondary: #DCF8D3;
+    --tertiary: #244D16;
+}
 
 body{
     padding: 0;
@@ -175,4 +179,22 @@ p{
 
 #loser_text{
     font-size: 2rem;
+}
+
+#goHome{
+    font-family: 'Sen';
+    color: whitesmoke;
+    font-size: 1.5rem;
+    width: fit-content;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin: auto;
+    margin-top: 2rem;
+    border-radius: 2px;
+
+    background-color: #16161d;
+    color: whitesmoke;
+    border-color: whitesmoke;
 }
