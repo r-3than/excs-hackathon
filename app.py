@@ -3,7 +3,7 @@ import Account
 import Round
 import pandas as pd
 import base64
-from data_util import select_round_data, plot_stock_prices
+from data_util import select_round_data, split_dataframe, plot_stock_prices#, plot_stock_prices3
 
 
 app = Flask(__name__)
@@ -14,20 +14,27 @@ share_value = 500
 user_account = Account.Account('Joe', ff_amount)
 tickers = ['AMZN', 'MSFT', 'BA', 'PFE', 'NKE']
 selected_data = None
+chunks = []
+max_val = None
+min_val = None
 
 @app.route('/')
 def index():
-    global selected_data 
+    #global selected_data
+    #global chunks
+    #global max_val
+    #global min_val
     # Check if data has already been selected
     if selected_data is None:
         # Data has not been selected yet, so select it
         stock_data = pd.read_csv('data/historical_closing_prices.csv')
-        selected_data = select_round_data(stock_data, 'ReefRaveDelicacies')
-        new_round = Round.Round(selected_data)
+        selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
+        new_round = Round.Round(selected_data, max_val, min_val)
+        chunks = split_dataframe(selected_data)
     else:
         # Data has already been selected, no need to run select_round_data again
         pass 
-    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies')
+    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
     plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
     #return render_template('index.html', plot_base64 = plot_base64)
     return render_template('main.html')
