@@ -24,7 +24,6 @@
             socket.on('connect', function() {
                 var seshKey = getCookie("seshKey");
                 socket.emit('getPlayer', {"data": seshKey});
-                // socket.emit('connect')
             });
             socket.on('getKey', function(msg) {
                 
