@@ -242,9 +242,12 @@ def joinLobby(message):
     #join(message)
 
     #print(f"Conn event: {request.sid} should have called join event")
+    
+    player_names = []
     for ply in lobby.players:
-        if ply.sid != request.sid:
-            emit('newPlayerJoined', {'data': player_name},to=ply.sid)
+        player_names.append(ply.display_name)
+    for ply in lobby.players:
+        emit('newPlayerJoined', {'data': player_names},to=ply.sid)
 
 
 
