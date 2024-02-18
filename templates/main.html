@@ -23,12 +23,21 @@
             socket.on('connect', function() {
                 var seshKey = getCookie("seshKey");
                 socket.emit('getPlayer', {"data": seshKey});
+                gameLoop(0);
                 // socket.emit('connect')
             });
             socket.on('getKey', function(msg) {
                 
                 setCookie("seshKey",msg.data,7); //set cookie for 7 days
             });
+
+
+            socket.on("show_round", function(msg){
+                console.log("WTFFFF");
+                gameLoop(msg.data);
+                document.getElementById("stockHeld").innerHTML = "Stock Held: " + msg.stock;
+                document.getElementById("freeFunds").innerHTML = "Free Funds: " + msg.ff;
+            })
         });
     </script>
 
@@ -54,8 +63,8 @@
         <div class="main wrapper">
             <div class="main box account">
                 <p id="demo"></p>
-                <h2>Stock Value:</h2>
-                <h2>Free Funds:</h2>
+                <h2 id="stockHeld">Stock Held:</h2>
+                <h2 id="freeFunds">Free Funds: 10000</h2>
             </div>
             <div class="main box action">
                 <span>
@@ -187,9 +196,9 @@
         
 // Update the count down every 1 second
     var secondsleft;
-        function gameLoop(){
-            secondsleft = 20;
-            nextGraph(testImg); // when does thomas does his thing lobby created show graph
+        function gameLoop(index){
+            secondsleft = 5;
+            nextGraph(index); // when does thomas does his thing lobby created show graph
             timerloop = setInterval(function() { // timer shit
 
             // Get today's date and time
@@ -198,9 +207,9 @@
             document.getElementById("demo").innerHTML = secondsleft;
 
             // If the count down is finished, write some text
-            if (secondsleft < 0) {
-                clearInterval(x);
-                socket.emit('action', {"action": 'wait',"qty":0,"lobby_code":"{{ session['code'] }}" });
+            if (secondsleft <= 0) {
+                clearInterval(timerloop);
+                socket.emit('action', {"action": 'end',"qty":0,"lobby_code":"{{ session['code'] }}" });
             }}, 1000
             );
             

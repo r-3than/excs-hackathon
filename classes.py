@@ -1,4 +1,5 @@
 import uuid
+import pandas as pd 
 
 class Player:
     def __init__(self, sid: str, cookie_id:str, display_name: str) -> None:
@@ -85,6 +86,23 @@ class Lobby:
     def __init__(self, code: int) -> None:
         self.players = []
         self.code = code
+        self.choices = {}
+        self.currentRound = 0
+        self.maxRounds = 6
+        self.share =1
+        self.sharePrice = 2
+
+        stock_data = pd.read_csv('data/historical_closing_prices.csv')
+        selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
+        #new_round = Round.Round(selected_data, max_val, min_val)
+        chunks = split_dataframe(selected_data)
+        
+        for k in range(len(chunks)):
+            market_data.append([])
+            key = chunks[k].keys()[1] if chunks[k].keys()[0]=='Date' else chunks[k].keys()[0]
+            #mapped_data[k] = [{'open':list(chunks[k][key])[i], 'close':list(chunks[k][key])[i+1]} for i in range(len(chunks[k])-1)]
+            
+            market_data[k] = list(chunks[k][key])
 
     def has_player(self, player: Player) -> bool:
         return player.sid in [p.sid for p in self.players]
@@ -95,6 +113,21 @@ class Lobby:
             return True
         else:
             return False
+    def setChoice(self,ply,action,amt):
+        self.choices[ply] = (action,amt)
+
+    def nextRound(self):
+        for ply in list(self.choices.keys()):
+            act = self.choices[ply]
+            if act[0] == "buy":
+                ply.action_buy(int(act[1]),self.sharePrice)
+            if act[0] == "sell":
+                ply.action_sell(int(act[1]),self.sharePrice)
+        self.choices = {}
+        self.currentRound = self.currentRound +1
+
+        return self.currentRound
+        
 
     def remove_player(self, player: Player) -> bool:
         if self.has_player(player):
@@ -102,3 +135,8 @@ class Lobby:
             return True
         else:
             return False
+
+"""        if self.currentRound >= self.maxRounds:
+            for ply in self.players:
+                ply.session_id="-1"
+            return -1"""

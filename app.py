@@ -161,8 +161,12 @@ def joinLobby(message):
     assert isinstance(lobby, Lobby)
 
     print(f"Conn event: {request.sid} has found lobby {lobby.code}")
+    
 
     player = Player(request.sid,message["data"], session.get("display_name", "Player"))
+    for ply in players:
+        if request.cookies.get("seshKey") == ply.session_id:
+            player = ply
 
     if lobby.add_player(player):
         print(f"Conn event: {request.sid} has been added to {lobby.code}")
@@ -183,11 +187,15 @@ def joinLobby(message):
 @socketio.event
 def getPlayer(message):
     # Gets called by each client when they first load the game page
+    key=message["data"]
+    print(f"I AM {key  } currently this sid {request.sid}")
     found = False
     for ply in players:
         if message["data"] == ply.session_id:
+            print(f"{ply.sid} -> current {request.sid}")
             found = True
             ply.sid = request.sid
+            print(f"CHANGEEEE {ply.sid} -> current {request.sid}")
     if found == True:
         emit('getKey', {'data': message["data"]}) #update token for another 7 days to the client
         return #dont create new key
@@ -238,7 +246,30 @@ def action(message):
     # Part of the example, just an echo event
     print(f"Echo event triggered by {request.sid}")
     print(message)
-    print(message["action"])
+    found = False
+    for ply in players:
+        if ply.session_id == request.cookies.get("seshKey"):
+                found = True
+                break
+    if found == False:
+        return
+    if not str(message["qty"]).isnumeric():
+        return
+    for lob in lobbies:
+        print("LOB CODES",lob.code)
+        print("user CODES",message["lobby_code"])
+        if str(message["lobby_code"]) == str(lob.code):
+
+            if message["action"] == "end":
+                next_graph=lob.nextRound()
+                print("^^")
+                print(lob.players)
+                for upply in lob.players:
+                    print("SENDING TO",upply.display_name)
+                    emit("show_round",{"data":next_graph,"stock":upply.share_c,"ff":upply.ff_amount},to=upply.sid)
+                    print("I WANT TO SEND TO ",upply.sid)
+            else:
+                lob.setChoice(ply,message["action"],message["qty"])
 
 
 

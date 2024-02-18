@@ -29,7 +29,7 @@
             socket.on('getKey', function(msg) {
                 
                 setCookie("seshKey",msg.data,7); //set cookie for 7 days
-                socket.emit("joinLobby",{data:"ashdbkjas"});//join Lobby
+                socket.emit("joinLobby",{data:msg.data});//join Lobby
             });
             socket.on('newPlayerJoined', function(msg) {
                 
