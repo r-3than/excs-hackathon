@@ -265,6 +265,7 @@
         function nextGraph(x) {
             if(x<graphCount) {
                 var ctx = graphs[x].getContext('2d');
+                ctx.strokeStyle = '#DCF8D3';
                 ctx.beginPath();
                 for (var i = 0; i < data[x].length; i++) {
                     //console.log(i * graphs[x].width/(data[x].length-1))

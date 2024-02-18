@@ -109,7 +109,7 @@ class Lobby:
             self.market_data[k] = list(chunks[k][key])
 
     def has_player(self, player: Player) -> bool:
-        return player.sid in [p.sid for p in self.players]
+        return player.session_id in [p.session_id for p in self.players]
 
     def get_market_data(self):
         return self.market_data

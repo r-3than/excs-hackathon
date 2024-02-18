@@ -104,6 +104,8 @@ h1 {
 
 .main.box.action input, .main.box.multiplayer input {
     background-color: var(--background);
+    text-align: center;
+    color: var(--secondary);
     border: none;
     border-radius: 0.2rem;
     height: 1.5rem;
@@ -130,10 +132,8 @@ h1 {
 .main.box.multiplayer input {
     width: 98%;
     height: 2rem;
-    color: var(--secondary);
     border-color: var(--secondary);
     border-style: solid;
-    text-align: center;
     font-size: large;
 }
 

@@ -60,35 +60,35 @@ def index():
 
 @app.route("/main", methods=["GET", "POST"])
 def main():
-    if request.method == "GET":
-        code = session.get("code", None)
-        print(f"Main req: loading main for lobby {code}!")
+    # if request.method == "GET":
+    #     code = session.get("code", None)
+    #     print(f"Main req: loading main for lobby {code}!")
 
-        if code is None:
-            print("Main req: no code found!")
-            return redirect("/")
+    #     if code is None:
+    #         print("Main req: no code found!")
+    #         return redirect("/")
 
-        lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
-        if lobby is None:
-            print(f"Main req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
-            return redirect("/")
+    #     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    #     if lobby is None:
+    #         print(f"Main req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+    #         return redirect("/")
 
-        assert(isinstance(lobby, Lobby))
+    #     assert(isinstance(lobby, Lobby))
 
-        session_key = request.cookies.get("seshKey", None)
+    #     session_key = request.cookies.get("seshKey", None)
 
-        if not session_key in [p.session_id for p in lobby.players]:
-            print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
-            return redirect("/")
+    #     if not session_key in [p.session_id for p in lobby.players]:
+    #         print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
+    #         return redirect("/")
 
-    return render_template("main.html",market_data=lobby.get_market_data(), ticker='ReefRaveDelicacies')
-    # code = session.get("code", None)
-    # for lob in lobbies:
-    #     if lob.code == code:
-    #         return render_template("main.html",market_data=lob.get_market_data())
-    # return redirect("/")
+    # return render_template("main.html",market_data=lobby.get_market_data(), ticker='ReefRaveDelicacies')
+    code = session.get("code", None)
+    for lob in lobbies:
+        if str(lob.code) == str(code):
+            return render_template("main.html",market_data=lob.get_market_data(), ticker='ReefRaveDelicacies')
+    return redirect("/")
 
-    
+
 
 
 
@@ -230,9 +230,9 @@ def joinLobby(message):
             player = ply
 
     if lobby.add_player(player):
-        print(f"Conn event: {request.sid} has been added to {lobby.code}")
+        print(f"Conn event: {player.display_name} has been added to {lobby.code}")
     else:
-        print(f"Conn event: {request.sid} is already in {lobby.code}!")
+        print(f"Conn event: {player.display_name} is already in {lobby.code}!")
 
     message = {"room": str(code)}
     player_name = session.get("display_name", "Player")
@@ -299,7 +299,7 @@ def beginGame():
 
     assert isinstance(lobby, Lobby)
 
-    print(f"Bg event: {request.sid} has found lobby {lobby.code}")
+    print(f"Bg event: {request.sid} has found lobby {lobby.code} with players {[p.display_name for p in lobby.players]}")
 
     for ply in lobby.players:
         emit('beginGame', to=ply.sid)
