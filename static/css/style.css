@@ -87,7 +87,7 @@ h1 {
 }
 
 
-.main.box.action, .main.box.multiplayer button {
+.main.box.action button, .main.box.multiplayer button {
     background-color: var(--primary);
     color: var(--secondary);
     border-radius: 0.2rem;
@@ -95,7 +95,7 @@ h1 {
     height: 1.7rem;
 }
 
-.main.box.action, .main.box.multiplayer input {
+.main.box.action input, .main.box.multiplayer input {
     background-color: var(--background);
     border: none;
     border-radius: 0.2rem;

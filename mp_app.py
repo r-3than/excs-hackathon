@@ -34,7 +34,7 @@ lobbies = []
 def index():
     print("Homepage request made")
     # Homepage
-    return render_template('index.html', async_mode=socketio.async_mode)
+    return render_template('lobby.html', async_mode=socketio.async_mode)
 
 
 @app.route('/game', methods=["GET", "POST"])
@@ -49,10 +49,10 @@ def game():
             return redirect("/")
     # Joining an existing game
     else:
-        code = request.form["room_code"]
+        code = request.form["codeInput"]
         print(f"Join req: joiner has set session variable as code {code}")
         session["code"] = code
-        session["display_name"] = request.form["display_name"]
+        session["display_name"] = request.form["nameInput"]
         # NOTE cant do JoinRoom here because this isnt a socket event so we dont have sid
 
     lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
@@ -76,7 +76,7 @@ def create():
     print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
 
     session["code"] = code
-    session["display_name"] = request.form["display_name"]
+    session["display_name"] = request.form["nameInput"]
 
     return redirect(url_for("game"))
 
@@ -85,9 +85,10 @@ def create():
 def load_lobby():
     # Used to handle the form and decide which action to take
     print("Load lobby request made")
-    if request.form['action'] == "Create Room":
+    code = request.form.get("codeInput", "")
+    if code == "":
         return redirect(url_for("create"), 307) # Code 307 passes the POST data along with the reroute
-    elif request.form['action'] == "Join Room":
+    elif len(code) == 4 and code.isdecimal():
         return redirect(url_for("game"), 307)
     else:
         return redirect("/")

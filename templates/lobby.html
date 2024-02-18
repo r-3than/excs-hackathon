@@ -14,13 +14,15 @@
             </div>
         </div>
         <div class="main wrapper">
-            <div class="main box multiplayer">
-                <h2>CODE:</h2>
-                <input type="text" inputmode="numeric" id="codeInput" style="text-transform: uppercase;">
-                <h2>NAME:</h2>
-                <input id="nameInput">
-                <button id="lobbyButton" onclick="lobbyFunc()">CREATE LOBBY</button>
-            </div>
+            <!--div class="main box multiplayer"-->
+                <form templates method="POST" action="{{ url_for('load_lobby')}}" class="main box multiplayer">
+                    <h2>CODE:</h2>
+                    <input type="text" inputmode="numeric" name="codeInput" id="codeInput" style="text-transform: uppercase;">
+                    <h2>NAME:</h2>
+                    <input name="nameInput" id="nameInput">
+                    <button type="submit" id="lobbyButton">CREATE LOBBY</button>
+                </form>
+            <!--/div-->
         </div>
     </div>
 
@@ -36,18 +38,6 @@
                 lobbyButton.innerText = "JOIN LOBBY";
             }
         });
-
-        function lobbyFunc() {
-            // ADD MULTIPLAYER FUNCTIONS IN HERE
-            if(nameInput.value!="") {
-                console.log(nameInput.value);
-                if(lobbyButton.innerText=="CREATE LOBBY") {
-                    console.log('creating lobby');
-                } else {
-                    console.log('joining lobby '+codeInput.value.toUpperCase());
-                }
-            }
-        }
     </script>
 </body>
 </html>
