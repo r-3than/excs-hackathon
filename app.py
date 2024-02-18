@@ -81,7 +81,7 @@ def main():
             print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
             return redirect("/")
 
-    return render_template("main.html",market_data=lobby.get_market_data())
+    return render_template("main.html",market_data=lobby.get_market_data(), ticker='ReefRaveDelicacies')
     # code = session.get("code", None)
     # for lob in lobbies:
     #     if lob.code == code:
