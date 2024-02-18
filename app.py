@@ -58,33 +58,35 @@ def index():
 
 
 
-@app.route("/main", methods=["GET"])
+@app.route("/main", methods=["GET", "POST"])
 def main():
-    code = session.get("code", None)
-    print(f"Main req: loading main for lobby {code}!")
+    if request.method == "GET":
+        code = session.get("code", None)
+        print(f"Main req: loading main for lobby {code}!")
 
-    if code is None:
-        print("Main req: no code found!")
-        return redirect("/")
+        if code is None:
+            print("Main req: no code found!")
+            return redirect("/")
 
-    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
-    if lobby is None:
-        print(f"Main req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
-        return redirect("/")
+        lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+        if lobby is None:
+            print(f"Main req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+            return redirect("/")
 
-    assert(isinstance(lobby, Lobby))
+        assert(isinstance(lobby, Lobby))
 
-    session_key = request.cookies.get("seshKey", None)
+        session_key = request.cookies.get("seshKey", None)
 
-    if not session_key in [p.session_id for p in lobby.players]:
-        print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
-        return redirect("/")
+        if not session_key in [p.session_id for p in lobby.players]:
+            print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
+            return redirect("/")
 
-    code = session.get("code", None)
-    for lob in lobbies:
-        if lob.code == code:
-            return render_template("main.html",market_data=lob.get_market_data())
-    return redirect("/")
+    return render_template("main.html",market_data=lobby.get_market_data())
+    # code = session.get("code", None)
+    # for lob in lobbies:
+    #     if lob.code == code:
+    #         return render_template("main.html",market_data=lob.get_market_data())
+    # return redirect("/")
 
     
 
