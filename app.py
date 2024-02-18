@@ -30,6 +30,20 @@ players = []
 lobbies = []
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/ff_amount')
 def get_ff_amount():
     return jsonify({'ff_amount': user_account.ff_amount}), 200
@@ -41,8 +55,31 @@ def index():
     return render_template('home.html', async_mode=socketio.async_mode)
 
 
-@app.route("/main", methods=["POST"])
+
+
+
+@app.route("/main", methods=["GET"])
 def main():
+    code = session.get("code", None)
+    print(f"Main req: loading main for lobby {code}!")
+
+    if code is None:
+        print("Main req: no code found!")
+        return redirect("/")
+
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    if lobby is None:
+        print(f"Main req: no lobby found with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        return redirect("/")
+
+    assert(isinstance(lobby, Lobby))
+
+    session_key = request.cookies.get("seshKey", None)
+
+    if not session_key in [p.session_id for p in lobby.players]:
+        print(f"Main req: Browser {session_key} is no in lobby {code}! Sks are: {[p.session_id for p in lobby.players]}")
+        return redirect("/")
+
     code = session.get("code", None)
     for lob in lobbies:
         if lob.code == code:
@@ -50,6 +87,11 @@ def main():
     return redirect("/")
 
     
+
+
+
+
+
 
 @app.route('/pregame', methods=["GET", "POST"])
 def pregame():
@@ -87,6 +129,8 @@ def pregame():
     return render_template("pregame.html", players=player_names, lobby_leader=is_lobby_leader, async_mode=socketio.async_mode)
 
 
+
+
 @app.route('/create_lobby', methods=["POST"])
 def create_lobby():
     # Creates a new lobby then sends the user to join it
@@ -105,6 +149,8 @@ def create_lobby():
     return redirect(url_for("pregame"))
 
 
+
+
 @app.route("/find_lobby", methods=["POST"])
 def find_lobby():
     # Used to handle the form and decide which action to take
@@ -119,6 +165,29 @@ def find_lobby():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################
+#             SOCKET EVENTS               #
+###########################################
+
 @socketio.event
 def connect():
     # Gets called by each client when they first load the game page
@@ -126,6 +195,10 @@ def connect():
     #print(f"Conn event: triggered by {request.sid}")
 
     emit('my_response', {'data': 'Connected', 'count': 0})
+
+
+
+
 
 
 @socketio.event
@@ -149,7 +222,7 @@ def joinLobby(message):
     #print(f"Conn event: {request.sid} has found lobby {lobby.code}")
     
 
-    player = Player(request.sid,message["data"], session.get("display_name", "Player"))
+    player = Player(request.sid, message["data"], session.get("display_name", "Player"))
     for ply in players:
         if request.cookies.get("seshKey") == ply.session_id:
             player = ply
@@ -169,6 +242,13 @@ def joinLobby(message):
     #print(f"Conn event: {request.sid} should have called join event")
     for ply in lobby.players:
         emit('newPlayerJoined', {'data': player_name},to=ply.sid)
+
+
+
+
+
+
+
 
 @socketio.event
 def getPlayer(message):
@@ -195,6 +275,41 @@ def getPlayer(message):
 
     emit('getKey', {'data': cookieUuid})
 
+
+
+
+
+
+@socketio.event
+def beginGame():
+    print(f"Bg event: triggered by {request.sid}")
+    code = session.get("code", None)
+
+    if code is None:
+        print("Bg event: No lobby code set as session variable!")
+        return redirect("/")
+
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+
+    if lobby is None:
+        print(f"Bg event: {request.sid} has been unable to find a lobby with code {code}! Lobbies are: {[l.code for l in lobbies]}")
+        return redirect('/')
+
+    assert isinstance(lobby, Lobby)
+
+    print(f"Bg event: {request.sid} has found lobby {lobby.code}")
+
+    for ply in lobby.players:
+        emit('beginGame', to=ply.sid)
+
+
+
+
+
+
+
+
+
 @socketio.event
 def join(message):
     # This is what actually puts a client into a room
@@ -208,6 +323,8 @@ def join(message):
 
 
 
+
+
 @socketio.event
 def my_room_event(message):
     # This is part of the example app, used to send a message to the room
@@ -216,6 +333,9 @@ def my_room_event(message):
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']},
          to=message['room'])
+
+
+
 
 @socketio.event
 def my_event(message):
@@ -256,6 +376,9 @@ def action(message):
                     #print("I WANT TO SEND TO ",upply.sid)
             else:
                 lob.setChoice(ply,message["action"],message["qty"])
+
+
+
 
 
 
