@@ -9,7 +9,10 @@
     <h1>Trading Game</h1>
     <p>FF Amount: <span id="ff-amount">Loading...</span></p>
     <h1>Stock Prices</h1>
-    <img src="data:image/png;base64,{{ plot_base64 }}" alt="Stock Prices">
+    <div class="plot-container">
+        <img src="data:image/png;base64,{{ plot_base64_1 }}" class="plot" alt="Plot 1">
+        <img src="data:image/png;base64,{{ plot_base64_2 }}" class="plot" alt="Plot 2">
+    </div>
     <label for="buy-quantity">Buy Quantity ($):</label>
     <input type="number" id="buy-quantity" min="0" step="1" value="0">
     <button onclick="buyStock()">Buy Stocks</button>
