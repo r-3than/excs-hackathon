@@ -12,12 +12,19 @@ async_mode = None
 
 
 app = Flask(__name__)
+<<<<<<< HEAD
 app.config["SECRET_KEY"] = "xyz"
+=======
+>>>>>>> luc
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 
+<<<<<<< HEAD
 
+=======
+app.config["SECRET_KEY"] = 'secret'
+>>>>>>> luc
 
 lobbies = []
 
@@ -34,6 +41,7 @@ lobbies = []
 def index():
     print("Homepage request made")
     # Homepage
+<<<<<<< HEAD
     return render_template('home.html', async_mode=socketio.async_mode)
 
 
@@ -45,10 +53,20 @@ def main():
 def pregame():
     # Joins a pregame lobby
     print("Join lobby request made")
+=======
+    return render_template('index.html', async_mode=socketio.async_mode)
+
+
+@app.route('/game', methods=["GET", "POST"])
+def game():
+    print("Join lobby request made")
+    # This joins a game
+>>>>>>> luc
 
     # Just created a game
     if request.method == "GET":
         code = session.get("code", None)
+<<<<<<< HEAD
         is_lobby_leader = True
     # Joining an existing game
     else:
@@ -79,6 +97,28 @@ def pregame():
 
 @app.route('/create_lobby', methods=["POST"])
 def create_lobby():
+=======
+        if code is None:
+            return redirect("/")
+    # Joining an existing game
+    else:
+        code = request.form["room_code"]
+        print(f"Join req: joiner has set session variable as code {code}")
+        session["code"] = code
+        session["display_name"] = request.form["display_name"]
+        # NOTE cant do JoinRoom here because this isnt a socket event so we dont have sid
+
+    lobby = next((l for l in lobbies if str(l.code) == str(code)), None)
+    assert isinstance(lobby, Lobby)
+
+    player_names = [p.display_name for p in lobby.players]
+
+    return render_template("game.html", players=player_names, async_mode=socketio.async_mode)
+
+
+@app.route('/create', methods=["POST"])
+def create():
+>>>>>>> luc
     # Creates a new lobby then sends the user to join it
     print("Create lobby request made")
     code = randint(1000, 9999)
@@ -90,6 +130,7 @@ def create_lobby():
     print(f"A lobby with code {code} has been created! Lobbies are now: {lobbies}")
 
     session["code"] = code
+<<<<<<< HEAD
     session["display_name"] = request.form["nameInput"]
 
     return redirect(url_for("pregame"))
@@ -104,6 +145,21 @@ def find_lobby():
         return redirect(url_for("create_lobby"), 307) # Code 307 passes the POST data along with the reroute
     elif len(code) == 4 and code.isdecimal():
         return redirect(url_for("pregame"), 307)
+=======
+    session["display_name"] = request.form["display_name"]
+
+    return redirect(url_for("game"))
+
+
+@app.route("/load_lobby", methods=["POST"])
+def load_lobby():
+    # Used to handle the form and decide which action to take
+    print("Load lobby request made")
+    if request.form['action'] == "Create Room":
+        return redirect(url_for("create"), 307) # Code 307 passes the POST data along with the reroute
+    elif request.form['action'] == "Join Room":
+        return redirect(url_for("game"), 307)
+>>>>>>> luc
     else:
         return redirect("/")
 
@@ -122,7 +178,11 @@ def find_lobby():
 #######################################
 @socketio.event
 def connect():
+<<<<<<< HEAD
     # Gets called by each client when they first load the pregame page
+=======
+    # Gets called by each client when they first load the game page
+>>>>>>> luc
     print(f"Conn event: triggered by {request.sid}")
     code = session.get("code", None)
 
@@ -189,6 +249,12 @@ def my_event(message):
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']})
 
+<<<<<<< HEAD
+=======
+@socketio.event
+def empty():
+    pass
+>>>>>>> luc
 
 
 

@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 class Player:
     def __init__(self, sid: str, display_name: str) -> None:
         # TODO known issue where sid resets with refresh and doesnt persist with session
+=======
+import uuid
+
+class Player:
+    def __init__(self, sid: str, cookie_id:str, display_name: str) -> None:
+        self.session_id = cookie_id
+>>>>>>> luc
         self.sid = sid
         self.display_name = display_name
 
