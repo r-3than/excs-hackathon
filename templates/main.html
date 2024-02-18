@@ -186,8 +186,8 @@
             } else {
                 console.log(sellInput.value);
                 // TODO call sell function
-                socket.emit('action', {"action": 'sell',"qty":buyInput.value,"lobby_code":"{{ code }}" });
-                currentAction.innerHTML = "You are currently selling " + buyInput.value + " " + tickerNoCaps;
+                socket.emit('action', {"action": 'sell',"qty":sellInput.value,"lobby_code":"{{ code }}" });
+                currentAction.innerHTML = "You are currently selling " + sellInput.value + " " + tickerNoCaps;
                 resetBuy()
                 resetSell()
                 resetWait()
