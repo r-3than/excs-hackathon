@@ -1,7 +1,11 @@
 class Round:
-    def __init__(self, round_data):
+    def __init__(self, round_data, max_value, min_value, chunks=5):
         self.round_data = round_data
+        self.chunks = chunks
+        self.max_value = max_value
+        self.min_value = min_value
         self.players = {}
+        self.active = True
 
     def add_player(self, player_name, account):
         """
@@ -39,3 +43,6 @@ class Round:
             dict: Dictionary containing player names as keys and corresponding Account objects as values
         """
         return self.players
+    
+    def end_round(self):
+        self.active = False
