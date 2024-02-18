@@ -41,6 +41,7 @@
                 let stockValue = document.getElementById("stockHeld")
                 stockValue.innerHTML = tickerNoCaps + " Stock Held: "  + msg.stock;
                 document.getElementById("freeFunds").innerHTML = "Free Funds: " + msg.ff;
+                clearInterval(timerloop);
             })
             let tickerNoCaps = addSpacesBeforeCapital("{{ ticker }}");
             let stockValue = document.getElementById("stockHeld")
