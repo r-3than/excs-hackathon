@@ -22,6 +22,7 @@ user_account = Account.Account("token1",'Joe', ff_amount)
 tickers = ['AMZN', 'MSFT', 'BA', 'PFE', 'NKE']
 selected_data = None
 chunks = []
+market_data = []
 max_val = None
 min_val = None
 
@@ -42,7 +43,27 @@ def index():
 
 @app.route("/main", methods=["POST"])
 def main():
-    return render_template("main.html")
+    selected_data = None
+    if selected_data is None:
+        # Data has not been selected yet, so select it
+        stock_data = pd.read_csv('data/historical_closing_prices.csv')
+        selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
+        #new_round = Round.Round(selected_data, max_val, min_val)
+        chunks = split_dataframe(selected_data)
+        
+        for k in range(len(chunks)):
+            market_data.append([])
+            key = chunks[k].keys()[1] if chunks[k].keys()[0]=='Date' else chunks[k].keys()[0]
+            #mapped_data[k] = [{'open':list(chunks[k][key])[i], 'close':list(chunks[k][key])[i+1]} for i in range(len(chunks[k])-1)]
+            
+            market_data[k] = list(chunks[k][key])
+    else:
+        # Data has already been selected, no need to run select_round_data again
+        pass 
+    plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
+    plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
+
+    return render_template("main.html",market_data=market_data)
 
 @app.route('/pregame', methods=["GET", "POST"])
 def pregame():
@@ -216,7 +237,7 @@ def action(message):
     # Part of the example, just an echo event
     print(f"Echo event triggered by {request.sid}")
     print(message)
-    print(message["data"])
+    print(message["action"])
 
 
 
