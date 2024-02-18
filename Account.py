@@ -1,5 +1,6 @@
 class Account:
-    def __init__(self, player_name, ff_amount):
+    def __init__(self, player_session_token, player_name, ff_amount):
+        self.player_session_token = player_session_token
         self.player_name = player_name
         self.ff_amount = ff_amount
         self.share_c = 0.0

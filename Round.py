@@ -1,48 +1,36 @@
+from data_util import select_round_data, split_dataframe
+import pandas as pd
+
+
 class Round:
-    def __init__(self, round_data, max_value, min_value, chunks=5):
-        self.round_data = round_data
+    def __init__(self, chunks=5):
+        self.round_data = None
+        self.ticker = None
         self.chunks = chunks
-        self.max_value = max_value
-        self.min_value = min_value
-        self.players = {}
+        self.max_value = None
+        self.min_value = None
+        self.active = False
+        self.share_price = None
+
+    def generate_round_data(self, filename, ticker):
+        stock_data = pd.read_csv(filename)
+        self.round_data, self.max_value, self.min_value = select_round_data(stock_data, ticker)
+        self.chunks = split_dataframe(self.round_data)
+
+    def start_round(self):
         self.active = True
 
-    def add_player(self, player_name, account):
-        """
-        Add a player to the round with their corresponding account.
-
-        player_name (str): Name of the player
-        account (Account): Account object representing the player's funds and shares
-        """
-        self.players[player_name] = account
-
-    def get_player_account(self, player_name):
-        """
-        Get the account of a player.
-
-        player_name (str): Name of the player
-        Returns:
-            Account: Account object representing the player's funds and shares
-        """
-        return self.players.get(player_name)
-
-    def remove_player(self, player_name):
-        """
-        Remove a player from the round.
-
-        player_name (str): Name of the player to remove
-        """
-        if player_name in self.players:
-            del self.players[player_name]
-
-    def get_all_player_accounts(self):
-        """
-        Get all player accounts in the round.
-
-        Returns:
-            dict: Dictionary containing player names as keys and corresponding Account objects as values
-        """
-        return self.players
+    def get_round_data(self):
+        return self.round_data
+    
+    def get_chunks(self):
+        return self.chunks
+    
+    def get_max_value(self):
+        return self.max_value
+    
+    def get_min_value(self):
+        return self.min_value
     
     def end_round(self):
         self.active = False
