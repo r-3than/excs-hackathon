@@ -55,18 +55,18 @@ h1 {
 }
 
 .main.box.graph {
+    padding: 2%;
     background-color: var(--tertiary);
     width: 100%;
     flex-direction: row;
     justify-content: center;
 }
 
-.main.box.graph img {
+.main.box.graph canvas {
     /*background-color: var(--secondary);*/
-    opacity: 0;
-    object-fit: contain;
+    /*object-fit: contain;*/
     height: 10rem;
-    transition: 0s; /*change*/
+    /*transition: .5s;*/
 }
 
 .main.box.account {

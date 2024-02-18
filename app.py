@@ -15,6 +15,7 @@ user_account = Account.Account('Joe', ff_amount)
 tickers = ['AMZN', 'MSFT', 'BA', 'PFE', 'NKE']
 selected_data = None
 chunks = []
+market_data = []
 max_val = None
 min_val = None
 
@@ -22,6 +23,7 @@ min_val = None
 def index():
     global selected_data
     global chunks
+    global market_data
     global max_val
     global min_val
     # Check if data has already been selected
@@ -31,6 +33,13 @@ def index():
         selected_data, max_val, min_val = select_round_data(stock_data, 'ReefRaveDelicacies')
         new_round = Round.Round(selected_data, max_val, min_val)
         chunks = split_dataframe(selected_data)
+        
+        for k in range(len(chunks)):
+            market_data.append([])
+            key = chunks[k].keys()[1] if chunks[k].keys()[0]=='Date' else chunks[k].keys()[0]
+            #mapped_data[k] = [{'open':list(chunks[k][key])[i], 'close':list(chunks[k][key])[i+1]} for i in range(len(chunks[k])-1)]
+            
+            market_data[k] = list(chunks[k][key])
     else:
         # Data has already been selected, no need to run select_round_data again
         pass 
@@ -38,7 +47,7 @@ def index():
     plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
     #return render_template('index.html', plot_base64 = plot_base64)
     #return render_template('logo.html')
-    return render_template('main.html')
+    return render_template('main.html', market_data=market_data)
 
 @app.route('/ff_amount')
 def get_ff_amount():
