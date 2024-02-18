@@ -176,7 +176,15 @@ def find_lobby():
 
 
 
+@app.route('/endgame', methods=["GET", "POST"])
+def endgame():
 
+    # remove from session
+
+    # get lobby code
+    # find the lobby with players
+
+    return render_template("end_screen.html", u_position =5, async_mode=socketio.async_mode)
 
 
 
@@ -382,6 +390,9 @@ def action(message):
 
             if message["action"] == "end":
                 next_graph=lob.nextRound()
+                if(next_graph == -1):
+                    for player in lob.players:
+                        emit("endgame", to=player.sid)
                 #print("^^")
                 #print(lob.players)
                 for upply in lob.players:
