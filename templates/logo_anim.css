@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
+
+/* whitesmoke, blue */
+/* 16161d */
+
+body{
+    padding: 0;
+    margin: 0;
+}
+
+.container{
+    height: 500px;
+    width: 500px;
+    background-color: #16161d;
+    position: absolute;
+    margin: auto;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.logo p{
+    width: 100%;
+    height:500px;
+    line-height: 500px;
+    font-family: "Sen", sans-serif ;
+    font-optical-sizing: auto;
+    font-size: 6rem;
+    font-weight: 600;
+    position: relative;
+    margin: auto;
+    text-align: center;
+    color: whitesmoke;
+    z-index: 20;
+
+}
+
+.line{
+    background-color: green;
+    height: 30px;
+    border-radius: 40px;
+    position: absolute;
+}
+
+.anim{
+    z-index: 10;
+    animation-delay: 0.3s;
+    animation-duration: 8s;
+    animation-name: draw1;
+    animation-iteration-count: infinite; 
+}
+
+.l1{
+    --w: 50px;
+
+    top:300px;
+    left:35px;
+
+    width: 100px;
+
+    /* --w: 100px; */
+    /* padding-left: var(--w);
+
+    animation-delay: 0.3s;
+    animation-duration: 5s;
+    animation-name: draw1;
+    animation-iteration-count: infinite; */
+}
+
+.l2{
+    /* --w: 80px; */
+
+    top:238px;
+    left:77px;
+    width: 160px;
+    transform: rotate(-60deg);
+
+    /* width: var(--w);
+    padding-left: var(--w);
+
+    animation-delay: 0.3s;
+    animation-duration: 5s;
+    animation-name: draw2;
+    animation-iteration-count: infinite; */
+}
+
+.l3{
+    top:250px;
+    left:135px;
+    width: 190px;
+    transform: rotate(60deg);
+}
+
+.l4{
+    top:248px;
+    left:220px;
+    width: 220px;
+    transform: rotate(-55deg);
+
+    animation-delay: 0.3s;
+    animation-duration: 5s;
+    animation-name: draw;
+    animation-iteration-count: infinite;
+}
+/* start 223 */
+
+.fish{
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    top:93px;
+    right:31px;
+    transform: rotate(-7deg);
+    /* border: 1px solid black */
+
+}
+
+.f_head{
+    background-color: green;
+    border-radius: 50% 50% 50% 50% / 100% 100% 0% 0% ;
+    position: absolute;
+    top:10px;
+    right: 5px;
+    height: 30px;
+    width: 40px;
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+.f_body{
+    background-color: green;
+    border-radius: 50% 50% 50% 50% / 100% 100% 0% 0% ;
+    position: absolute;
+    top:29px;
+    right:29px;
+    height: 40px;
+    width: 40px;
+    transform: rotate(-135deg);  
+    z-index: -1;
+}
+
+.f_tail{
+    position: absolute;
+    width: 0; 
+    height: 0; 
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+  
+    border-top: 30px solid green;
+    transform: rotate(-135deg);  
+    top: 44px;
+    right:33px;
+}
+
+.f_eye{
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: black;
+    top: 18px;
+    left: 10px;
+
+
+    animation-delay: 0.3s;
+    animation-duration: 8s;
+    animation-name: wink;
+    animation-iteration-count: infinite; 
+}
+
+@keyframes draw1{
+    0% {
+        width: 420px;
+        /* transform: translateX(100px); */
+      }
+
+    90%{
+        width: 0%;
+        transform: translateX(260px);
+    }
+}
+
+@keyframes wink{
+    0% {
+        width: 10px;
+      }
+
+    75%{
+        width: 10px;
+    }
+    85%{
+        width: 2px;
+    }
+
+    95%{
+        width: 10px;
+    }
+}
+
+/*
+@keyframes draw1{
+    0% {
+        width: 0%;
+      }
+    
+    5%{
+        padding:0;
+      }
+}
+
+
+@keyframes draw2{ 
+    0% {
+        width: 0%;
+         transform: translate(50px, 50px) rotate(-60deg); 
+        padding-left: 80px;
+        background: none;
+      }
+
+    40%{
+        width: 0%;
+        transform: translate(50px, 50px) rotate(-60deg);
+        padding-left: 80px;
+        background: none;
+    }
+
+    41%{
+        
+        background-color: green; 
+    }
+    
+    40%{
+        padding:0;
+      }
+
+}
+*/
