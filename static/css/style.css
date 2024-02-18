@@ -1,16 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
 
 :root {
-    --background: #16161d;
-    --primary: darkolivegreen;
-    --secondary: aliceblue;
-    --tertiary: cadetblue;
+    --background: #16161D;
+    --primary: #5BA551;
+    --secondary: #DCF8D3;
+    --tertiary: #244D16;
 }
 
 body {
     font-family: 'Sen';
     background-color: var(--background);
     padding: 3%;
+    overflow: hidden;
 }
 
 h1 {
@@ -45,12 +46,16 @@ h1 {
 }
 
 .main.box.title {
-    background-color: var(--primary);
-    width: 50%;
+    width: 25%;
+    padding: 0px;
+}
+
+.main.box.title img {
+    width: 100%;
 }
 
 .main.box.graph {
-    background-color: var(--primary);
+    background-color: var(--tertiary);
     width: 100%;
     flex-direction: row;
     justify-content: center;
@@ -66,6 +71,7 @@ h1 {
 
 .main.box.account {
     background-color: var(--secondary);
+    color: var(--background);
     width: 45%;
 }
 
@@ -87,15 +93,16 @@ h1 {
 }
 
 
-.main.box.action, .main.box.multiplayer button {
+.main.box.action button, .main.box.multiplayer button {
     background-color: var(--primary);
-    color: var(--secondary);
+    color: var(--background);
     border-radius: 0.2rem;
     border: none;
     height: 1.7rem;
+    font-weight: bold;
 }
 
-.main.box.action, .main.box.multiplayer input {
+.main.box.action input, .main.box.multiplayer input {
     background-color: var(--background);
     border: none;
     border-radius: 0.2rem;
