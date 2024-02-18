@@ -37,7 +37,7 @@ def index():
     plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
     plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
     #return render_template('index.html', plot_base64 = plot_base64)
-    return render_template('lobby.html')
+    #return render_template('logo.html')
     return render_template('main.html')
 
 @app.route('/ff_amount')
