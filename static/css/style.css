@@ -119,6 +119,7 @@ h1 {
     width: 0%;
     pointer-events: none;
     transition: 1s;
+    color: white;
 }
 
 .main.box.multiplayer {

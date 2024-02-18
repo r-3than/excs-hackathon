@@ -63,7 +63,7 @@ def main():
     plot_buffer = plot_stock_prices(selected_data, 'ReefRaveDelicacies', max_val, min_val)
     plot_base64 = base64.b64encode(plot_buffer.getvalue()).decode('utf-8')
 
-    return render_template("main.html",market_data=market_data)
+    return render_template("main.html",market_data=market_data,ticker='ReefRaveDelicacies')
 
 @app.route('/pregame', methods=["GET", "POST"])
 def pregame():
